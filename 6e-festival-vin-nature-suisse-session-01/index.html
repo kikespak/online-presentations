@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6e Festival Vin Nature Suisse — Brief Session 01</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===========================================
+   FIXED 16:9 STAGE: MANDATORY BASE STYLES
+   (viewport-base.css, included in full)
+   =========================================== */
+html, body { width:100%; height:100%; margin:0; overflow:hidden; background: var(--stage-bg,#000); }
+.deck-viewport { position:fixed; inset:0; overflow:hidden; background: var(--stage-bg,#000); }
+.deck-stage { position:absolute; left:0; top:0; width:1920px; height:1080px; overflow:hidden; transform-origin:0 0; background: var(--slide-bg,#fff); }
+.slide { position:absolute; inset:0; width:1920px; height:1080px; overflow:hidden; display:block; visibility:hidden; opacity:0; pointer-events:none; background: var(--slide-bg,#fff); }
+.slide.active, .slide.visible { visibility:visible; opacity:1; pointer-events:auto; z-index:1; }
+img, video, canvas, svg { max-width:100%; max-height:100%; }
+.deck-controls { position:fixed; left:50%; bottom:22px; transform:translateX(-50%); z-index:1000; }
+@media print {
+  html,body{width:1920px;height:auto;overflow:visible;background:#fff;}
+  .deck-viewport{position:static;overflow:visible;background:#fff;}
+  .deck-stage{position:static;width:auto;height:auto;transform:none!important;background:none;}
+  .slide{position:relative;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;width:1920px;height:1080px;break-after:page;page-break-after:always;}
+  .slide:last-child{break-after:auto;page-break-after:auto;}
+  .deck-controls{display:none!important;}
+}
+@media (prefers-reduced-motion: reduce) { *,*::before,*::after{ animation-duration:0.01ms!important; transition-duration:0.2s!important; } }
+
+/* ===========================================
+   THEME: GRAPE LEDGER
+   Deep aubergine "cellar" ground, warm vin-orange ink,
+   a CSS-drawn dot-cluster echoing the grape-grain direction,
+   and a left ledger-rail indexing the 3 retained directions.
+   =========================================== */
+* { box-sizing: border-box; }
+:root{
+  --ground:#211018; --ground-2:#160b10; --ground-3:#2c1620;
+  --paper:#f3e9dd; --paper-dim:rgba(243,233,221,.62);
+  --amber:#d98a3d; --amber-soft:#f0b878; --amber-dim:rgba(217,138,61,.35);
+  --mat:#ece0c7; --mat-2:#e4d5b3;
+  --line:rgba(243,233,221,.14);
+  --font-display:'Fraunces', serif;
+  --font-mono:'IBM Plex Mono', monospace;
+  --ease: cubic-bezier(0.16,1,0.3,1);
+}
+body{ background:var(--ground-2); }
+.stage-bg{ background:var(--ground-2); }
+
+.slide{
+  background: radial-gradient(circle at 82% 14%, #3a1a24 0%, var(--ground) 45%, var(--ground-2) 100%);
+  color: var(--paper);
+  font-family: var(--font-display);
+}
+.grain{ position:absolute; inset:0; opacity:.45; pointer-events:none; z-index:0;
+  background-image: radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);
+  background-size: 3px 3px; }
+
+/* --- Left ledger rail: persistent index of the 3 directions --- */
+.rail{ position:absolute; left:0; top:0; bottom:0; width:132px; border-right:1px solid var(--line);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:56px; z-index:5; }
+.rail .item{ font-family:var(--font-mono); font-size:15px; letter-spacing:.06em; color:var(--paper-dim);
+  writing-mode:vertical-rl; text-orientation:mixed; display:flex; align-items:center; gap:12px; transition:color .3s var(--ease); }
+.rail .item .n{ color:var(--amber-dim); font-weight:600; transition:color .3s var(--ease); }
+.rail .item.active{ color:var(--paper); }
+.rail .item.active .n{ color:var(--amber); }
+.rail .dot{ width:6px; height:6px; border-radius:50%; background:var(--amber-dim); transition:background .3s var(--ease); }
+.rail .item.active .dot{ background:var(--amber); box-shadow:0 0 10px var(--amber); }
+
+/* --- Page furniture: kicker, footer, page counter --- */
+.kicker{ font-family:var(--font-mono); font-size:18px; letter-spacing:.2em; text-transform:uppercase; color:var(--amber-soft); }
+.pagenum{ position:absolute; right:64px; bottom:48px; font-family:var(--font-mono); font-size:15px; color:var(--paper-dim); letter-spacing:.1em; z-index:5; }
+.foot-label{ position:absolute; left:180px; bottom:48px; font-family:var(--font-mono); font-size:15px; color:var(--paper-dim); letter-spacing:.08em; z-index:5; }
+
+h1,h2,h3{ margin:0; font-weight:600; }
+p{ margin:0; }
+
+/* --- Reveal animation system --- */
+.reveal{ opacity:0; transform:translateY(22px); transition:opacity .7s var(--ease), transform .7s var(--ease); }
+.slide.visible .reveal{ opacity:1; transform:translateY(0); }
+.reveal:nth-child(1){ transition-delay:.08s; } .reveal:nth-child(2){ transition-delay:.18s; }
+.reveal:nth-child(3){ transition-delay:.28s; } .reveal:nth-child(4){ transition-delay:.38s; }
+.reveal:nth-child(5){ transition-delay:.48s; } .reveal:nth-child(6){ transition-delay:.58s; }
+.d1{transition-delay:.1s!important;} .d2{transition-delay:.22s!important;} .d3{transition-delay:.34s!important;}
+.d4{transition-delay:.46s!important;} .d5{transition-delay:.58s!important;} .d6{transition-delay:.7s!important;}
+
+/* === Cluster dot motif (CSS-drawn, reused across the deck at small scale) === */
+.cluster{ position:absolute; }
+.dot{ position:absolute; border-radius:50%;
+  background: radial-gradient(circle at 32% 28%, var(--amber-soft), var(--amber) 60%, #a85f22 100%); }
+
+/* === Generic content blocks === */
+.eyebrow-block{ position:absolute; left:180px; top:96px; }
+.eyebrow-block h1, .eyebrow-block h2{ font-family:var(--font-display); font-style:italic; font-weight:500;
+  font-size:64px; color:var(--paper); margin-top:16px; line-height:1.08; }
+.eyebrow-block h1 b, .eyebrow-block h2 b{ font-style:normal; font-weight:600; color:var(--amber); }
+
+.bullet-list{ list-style:none; margin:0; padding:0; }
+.bullet-list li{ position:relative; padding-left:34px; margin-bottom:20px; font-size:23px; line-height:1.5; color:var(--paper); }
+.bullet-list li::before{ content:"—"; position:absolute; left:0; color:var(--amber); font-family:var(--font-mono); }
+.bullet-list.tight li{ margin-bottom:14px; font-size:20px; }
+
+.label{ font-family:var(--font-mono); font-size:14px; letter-spacing:.14em; text-transform:uppercase; color:var(--amber-soft); }
+
+/* image mat mount */
+.mat{ background:var(--mat); border-radius:3px; box-shadow:0 24px 50px rgba(0,0,0,.5); padding:14px; }
+.mat img{ display:block; width:100%; height:100%; object-fit:cover; border-radius:2px; }
+.mat.contain img{ object-fit:contain; background:#fdfaf3; }
+.mat .cap{ font-family:var(--font-mono); font-size:13px; color:#5b4a34; letter-spacing:.04em; padding:20px 4px 0; }
+
+.chip{ display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border:1px solid var(--amber-dim);
+  border-radius:999px; font-family:var(--font-mono); font-size:16px; color:var(--paper); }
+.chip .dot-sm{ width:6px; height:6px; border-radius:50%; background:var(--amber); }
+
+/* status badge for direction development state */
+.status{ display:inline-block; font-family:var(--font-mono); font-size:14px; letter-spacing:.1em; text-transform:uppercase;
+  padding:7px 16px; border-radius:4px; }
+.status.ready{ background:rgba(122,143,107,.18); color:#9fbf8e; border:1px solid rgba(159,191,142,.4); }
+.status.gap{ background:rgba(196,90,60,.18); color:#e79c82; border:1px solid rgba(231,156,130,.4); }
+.status.dev{ background:rgba(217,138,61,.18); color:var(--amber-soft); border:1px solid var(--amber-dim); }
+
+/* === Edit affordance === */
+.edit-hotzone{ position:fixed; top:0; left:0; width:80px; height:80px; z-index:10000; cursor:pointer; }
+.edit-toggle{ position:fixed; top:14px; left:14px; width:42px; height:42px; border-radius:50%; border:none;
+  background:var(--amber); color:#1a0e13; font-size:18px; cursor:pointer; opacity:0; pointer-events:none;
+  transition:opacity .3s ease; z-index:10001; }
+.edit-toggle.show, .edit-toggle.active{ opacity:1; pointer-events:auto; }
+.edit-toggle.active{ background:#e7a35c; }
+[contenteditable="true"]{ outline: 1.5px dashed var(--amber-soft); outline-offset:4px; }
+
+/* === Deck controls (progress + arrows), outside slide design system === */
+.deck-controls{ display:flex; align-items:center; gap:18px; background:rgba(20,10,14,.72); backdrop-filter:blur(6px);
+  padding:10px 18px; border-radius:999px; border:1px solid rgba(217,138,61,.25); }
+.deck-controls button{ background:none; border:none; color:var(--paper); font-size:20px; cursor:pointer; line-height:1; }
+.deck-controls .count{ font-family:var(--font-mono); font-size:14px; color:var(--paper-dim); min-width:56px; text-align:center; }
+
+/* ============ SLIDE-SPECIFIC LAYOUTS ============ */
+
+/* --- Slide 1: Title --- */
+.s-title .cluster{ right:150px; top:120px; width:640px; height:760px; }
+.s-title .content{ position:absolute; left:260px; top:220px; width:1020px; }
+.s-title h1{ font-family:var(--font-display); font-weight:500; font-style:italic; font-size:108px; line-height:1.04; color:var(--paper); margin:26px 0 0; }
+.s-title h1 b{ font-style:normal; font-weight:600; color:var(--amber); }
+.s-title .sub{ font-family:var(--font-mono); font-size:21px; color:var(--paper); opacity:.75; margin-top:34px; max-width:760px; line-height:1.7; }
+.s-title .meta{ position:absolute; left:260px; bottom:110px; display:flex; gap:64px; }
+.s-title .meta .value{ font-family:var(--font-display); font-size:24px; color:var(--paper); margin-top:8px; }
+
+/* --- Slide 2: Brief & vocabulaire --- */
+.s-brief .grid{ position:absolute; left:180px; top:230px; width:1600px; display:grid; grid-template-columns: 1.15fr .85fr; gap:70px; }
+.s-brief .col h3{ font-family:var(--font-mono); font-size:16px; letter-spacing:.12em; text-transform:uppercase; color:var(--amber-soft); margin-bottom:22px; }
+.s-brief .tagrow{ display:flex; flex-wrap:wrap; gap:12px; margin-top:6px; }
+.s-brief .avoid{ margin-top:38px; }
+.s-brief .avoid .bullet-list li::before{ content:"×"; color:#e79c82; }
+.s-brief .nature-card{ background:rgba(243,233,221,.06); border:1px solid var(--line); border-radius:10px; padding:34px 36px; }
+.s-brief .nature-card p{ font-size:20px; line-height:1.65; color:var(--paper); opacity:.9; margin-bottom:16px; }
+.s-brief .nature-card p:last-child{ margin-bottom:0; }
+.s-brief .nature-card b{ color:var(--amber-soft); font-weight:600; }
+
+/* --- Slide 3: Où on en est --- */
+.s-status .grid{ position:absolute; left:180px; top:230px; width:1600px; display:grid; grid-template-columns: 1fr 1fr; gap:80px; }
+.s-status .highlight{ margin-top:34px; background:rgba(217,138,61,.1); border-left:3px solid var(--amber); border-radius:0 8px 8px 0;
+  padding:26px 30px; }
+.s-status .highlight p{ font-size:21px; line-height:1.6; color:var(--paper); }
+.s-status .highlight .label{ margin-bottom:10px; display:block; }
+.s-status .rejected{ margin-top:30px; display:flex; gap:16px; align-items:flex-start; }
+.s-status .rejected .x{ color:#e79c82; font-family:var(--font-mono); font-size:22px; }
+.s-status .rejected p{ font-size:19px; color:var(--paper-dim); line-height:1.6; }
+
+/* --- Direction slides (4,5,6): shared layout --- */
+.s-dir .top{ position:absolute; left:180px; top:96px; right:96px; display:flex; justify-content:space-between; align-items:flex-start; }
+.s-dir .titleblock h2{ font-family:var(--font-display); font-style:italic; font-weight:500; font-size:60px; color:var(--paper); margin-top:14px; }
+.s-dir .titleblock h2 b{ font-style:normal; font-weight:600; color:var(--amber); }
+.s-dir .titleblock .origin{ font-family:var(--font-mono); font-size:16px; color:var(--paper-dim); margin-top:12px; }
+.s-dir .gallery{ position:absolute; left:180px; top:280px; display:flex; align-items:flex-start; gap:34px; }
+.s-dir .textcol{ position:absolute; right:96px; top:280px; width:500px; }
+.s-dir .textcol .why{ font-size:21px; line-height:1.6; color:var(--paper); opacity:.92; margin-bottom:26px; }
+.s-dir .textcol .label{ margin-bottom:10px; display:block; }
+
+/* --- Slide 7: style commandments --- */
+.s-rules .cards{ position:absolute; left:180px; top:250px; width:1600px; display:grid; grid-template-columns:repeat(3,1fr); gap:36px; }
+.s-rules .card{ background:rgba(243,233,221,.05); border:1px solid var(--line); border-radius:12px; padding:34px 32px; }
+.s-rules .card .icon{ width:44px; height:44px; border-radius:50%; background:var(--amber-dim); display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-mono); color:var(--amber-soft); font-weight:600; margin-bottom:20px; }
+.s-rules .card h4{ font-family:var(--font-display); font-size:26px; font-weight:600; color:var(--paper); margin-bottom:14px; }
+.s-rules .card p{ font-size:18px; line-height:1.55; color:var(--paper-dim); }
+
+/* --- Slide 8: timeline + formats --- */
+.s-next .timeline{ position:absolute; left:180px; top:250px; width:1600px; display:flex; justify-content:space-between; }
+.s-next .timeline::before{ content:""; position:absolute; top:7px; left:8px; right:8px; height:2px; background:var(--line); z-index:0; }
+.s-next .step{ width:23%; position:relative; padding-top:38px; z-index:1; }
+.s-next .step::before{ content:""; position:absolute; top:0; left:0; width:16px; height:16px; border-radius:50%; background:var(--amber); box-shadow:0 0 12px var(--amber); }
+.s-next .step .when{ font-family:var(--font-mono); font-size:15px; color:var(--amber-soft); letter-spacing:.06em; }
+.s-next .step h4{ font-family:var(--font-display); font-size:25px; font-weight:600; color:var(--paper); margin:10px 0 12px; }
+.s-next .step p{ font-size:17px; color:var(--paper-dim); line-height:1.5; }
+.s-next .divider{ position:absolute; left:180px; top:520px; width:1600px; height:1px; background:var(--line); }
+.s-next .formats{ position:absolute; left:180px; top:570px; width:1080px; }
+.s-next .formats .label{ margin-bottom:18px; display:block; }
+.s-next .formats .row{ display:flex; gap:16px; flex-wrap:wrap; }
+.s-next .deliverable{ position:absolute; right:96px; top:558px; width:420px; background:rgba(217,138,61,.1); border-left:3px solid var(--amber);
+  border-radius:0 8px 8px 0; padding:26px 30px; }
+.s-next .deliverable p{ font-size:18px; color:var(--paper); line-height:1.55; }
+
+/* --- Slide 9: checklist --- */
+.s-close .content{ position:absolute; left:180px; top:210px; width:1180px; }
+.s-close h2{ font-family:var(--font-display); font-style:italic; font-weight:500; font-size:66px; color:var(--paper); margin-top:12px; }
+.s-close h2 b{ font-style:normal; font-weight:600; color:var(--amber); }
+.s-close .checklist{ margin-top:44px; display:flex; flex-direction:column; gap:22px; }
+.s-close .checkitem{ display:flex; align-items:flex-start; gap:20px; }
+.s-close .checkitem .box{ width:28px; height:28px; border:1.5px solid var(--amber); border-radius:6px; flex:none; margin-top:2px; }
+.s-close .checkitem p{ font-size:22px; color:var(--paper); line-height:1.5; }
+.s-close .sidecard{ position:absolute; right:96px; top:280px; width:420px; background:var(--mat); border-radius:10px; padding:36px 32px;
+  box-shadow:0 24px 50px rgba(0,0,0,.5); }
+.s-close .sidecard .label{ color:#8a6a3f; }
+.s-close .sidecard p{ font-family:var(--font-mono); font-size:16px; color:#3a2c1a; line-height:1.7; margin-top:14px; }
+</style>
+</head>
+<body>
+<div class="deck-viewport stage-bg">
+  <main class="deck-stage" id="deckStage">
+
+    <!-- ============ SLIDE 1 — TITRE ============ -->
+    <section class="slide s-title active">
+      <div class="grain"></div>
+      <div class="cluster" id="clusterTitle"></div>
+      <div class="rail">
+        <div class="item"><span class="dot"></span><span class="n">01</span> Grain</div>
+        <div class="item"><span class="dot"></span><span class="n">02</span> Ombre</div>
+        <div class="item"><span class="dot"></span><span class="n">03</span> Collage</div>
+      </div>
+      <div class="content">
+        <div class="kicker reveal">Session 01 — Debrief atelier</div>
+        <h1 class="reveal">6e Festival<br><b>Vin Nature</b> Suisse</h1>
+        <p class="sub reveal">Trois directions retenues par Magali &amp; Benjamin — ce que chacune raconte, ce qu'il manque encore, et la marche à suivre pour la semaine prochaine.</p>
+      </div>
+      <div class="meta reveal">
+        <div><span class="label">Pour</span><br><span class="value">Violetta &amp; Karine</span></div>
+        <div><span class="label">Rendu final</span><br><span class="value">Fin août 2026</span></div>
+      </div>
+      <div class="pagenum">01 / 09</div>
+    </section>
+
+    <!-- ============ SLIDE 2 — LE BRIEF & VOCABULAIRE ============ -->
+    <section class="slide s-brief">
+      <div class="grain"></div>
+      <div class="rail">
+        <div class="item"><span class="dot"></span><span class="n">01</span> Grain</div>
+        <div class="item"><span class="dot"></span><span class="n">02</span> Ombre</div>
+        <div class="item"><span class="dot"></span><span class="n">03</span> Collage</div>
+      </div>
+      <div class="eyebrow-block">
+        <div class="kicker reveal">Rappel du brief client</div>
+        <h2 class="reveal">Ce qu'on cherche, <b>pour qui</b>, et ce qu'on évite</h2>
+      </div>
+      <div class="grid">
+        <div class="col reveal d1">
+          <h3>Univers</h3>
+          <div class="tagrow">
+            <span class="chip"><span class="dot-sm"></span>vivant</span>
+            <span class="chip"><span class="dot-sm"></span>libre</span>
+            <span class="chip"><span class="dot-sm"></span>pur</span>
+            <span class="chip"><span class="dot-sm"></span>biodiversité</span>
+            <span class="chip"><span class="dot-sm"></span>émotion</span>
+            <span class="chip"><span class="dot-sm"></span>élégance</span>
+            <span class="chip"><span class="dot-sm"></span>plaisir</span>
+          </div>
+          <h3 style="margin-top:36px;">Public</h3>
+          <p style="font-size:21px; line-height:1.6; opacity:.9;">Amateurs de vin nature, urbains, épicuriens (25–55 ans) + professionnels : sommeliers, cavistes, restaurateurs, médias.</p>
+          <div class="avoid">
+            <h3>À éviter absolument</h3>
+            <ul class="bullet-list tight">
+              <li>Clichés terroir / rustique conservateur</li>
+              <li>Esthétique punk, militante ou hippie</li>
+              <li>Visuels trop "typographiques"</li>
+              <li>Ambiances sombres ou négatives</li>
+              <li>Ton enfantin ou condescendant</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col reveal d2">
+          <h3>Le vin nature, en bref</h3>
+          <div class="nature-card">
+            <p>Fait <b>uniquement à partir de raisin</b>, sans intrant œnologique.</p>
+            <p><b>Fermentation spontanée</b> aux levures indigènes — une pratique vieille de 8 000 ans.</p>
+            <p><b>Sans sulfites ajoutés</b> → un vin "vivant", instable mais précis et pur.</p>
+            <p>En Suisse : certifié <b>Bio-Inspecta</b>, label "Vin Nature Certifié".</p>
+          </div>
+        </div>
+      </div>
+      <div class="pagenum">02 / 09</div>
+    </section>
+
+    <!-- ============ SLIDE 3 — OÙ ON EN EST ============ -->
+    <section class="slide s-status">
+      <div class="grain"></div>
+      <div class="rail">
+        <div class="item"><span class="dot"></span><span class="n">01</span> Grain</div>
+        <div class="item"><span class="dot"></span><span class="n">02</span> Ombre</div>
+        <div class="item"><span class="dot"></span><span class="n">03</span> Collage</div>
+      </div>
+      <div class="eyebrow-block">
+        <div class="kicker reveal">Réunion du 21 juillet — Magali &amp; Benjamin</div>
+        <h2 class="reveal">Où on en <b>est</b></h2>
+      </div>
+      <div class="grid">
+        <div class="col reveal d1">
+          <ul class="bullet-list">
+            <li>Première présentation de vos sketches — un passage en revue, pas encore un deck poli.</li>
+            <li>Beaucoup de pistes montrées ; l'objectif était d'identifier les directions à creuser.</li>
+            <li>3 directions retenues pour être développées plus finement.</li>
+          </ul>
+          <div class="rejected">
+            <span class="x">×</span>
+            <p><b>Écarté explicitement :</b> la piste "plusieurs types de bouteilles" (spiritueux + vins) — hors-sujet, le festival ne présente pas ces produits.</p>
+          </div>
+        </div>
+        <div class="col reveal d2">
+          <div class="highlight">
+            <span class="label">Le retour le plus important</span>
+            <p>« La <b>nature</b> du vin nature est encore absente de la plupart des pistes. » Il faut une référence plus claire à la vigne, au raisin, au terroir — pas une imagerie de vin générique.</p>
+          </div>
+          <div class="highlight" style="margin-top:26px;">
+            <span class="label">Ton recherché</span>
+            <p>Joyeux, convivial, accessible à un public jeune — à l'opposé d'un salon du vin classique.</p>
+          </div>
+        </div>
+      </div>
+      <div class="pagenum">03 / 09</div>
+    </section>
+
+    <!-- ============ SLIDE 4 — DIRECTION 01: GRAIN DE RAISIN ============ -->
+    <section class="slide s-dir s-dir1">
+      <div class="grain"></div>
+      <div class="rail">
+        <div class="item"><span class="dot"></span><span class="n">01</span> Grain</div>
+        <div class="item"><span class="dot"></span><span class="n">02</span> Ombre</div>
+        <div class="item"><span class="dot"></span><span class="n">03</span> Collage</div>
+      </div>
+      <div class="top">
+        <div class="titleblock reveal">
+          <div class="kicker">Direction 01 — Sketch 06</div>
+          <h2><b>Grain</b> de Raisin</h2>
+          <div class="origin">Piste de Violetta · statut <span class="status ready">la plus prometteuse</span></div>
+        </div>
+      </div>
+      <div class="gallery">
+        <div class="mat contain reveal d1" style="width:460px; height:325px;">
+          <img src="Deck%20Assets/d1-vio-lockup.jpg" alt="Lockup grain de raisin, Violetta">
+          <div class="cap">Sketch original — lockup logo &amp; nom du festival</div>
+        </div>
+        <div class="mat reveal d2" style="width:260px; height:400px;">
+          <img src="Deck%20Assets/d1-chatgpt-riso.jpg" alt="Variation riso, grain de raisin">
+          <div class="cap">Variation texture — riso</div>
+        </div>
+        <div class="mat reveal d3" style="width:260px; height:400px;">
+          <img src="Deck%20Assets/d1-gemini-cutout.jpg" alt="Variation papier découpé, grain de raisin">
+          <div class="cap">Variation texture — papier découpé</div>
+        </div>
+      </div>
+      <div class="textcol">
+        <p class="why reveal d4">Le verre à vin est construit à partir de points façon <b style="color:var(--amber-soft)">grain de raisin</b> — chaque point peut représenter un cépage différent : diversité et vin vivant en un seul motif.</p>
+        <span class="label reveal d5">Pourquoi ça plaît</span>
+        <ul class="bullet-list tight reveal d5">
+          <li>Un seul motif fort, facilement reconnaissable</li>
+          <li>Se décline sans texte — fonctionne en petit format</li>
+        </ul>
+        <span class="label reveal d6" style="margin-top:24px;">À trancher cette semaine</span>
+        <ul class="bullet-list tight reveal d6">
+          <li>Choisir UNE texture (trait, riso, papier découpé) plutôt que les 3</li>
+          <li>Intégrer la palette "vin orange"</li>
+        </ul>
+      </div>
+      <div class="pagenum">04 / 09</div>
+    </section>
+
+    <!-- ============ SLIDE 5 — DIRECTION 02: OMBRE & SILHOUETTE ============ -->
+    <section class="slide s-dir s-dir2">
+      <div class="grain"></div>
+      <div class="rail">
+        <div class="item"><span class="dot"></span><span class="n">01</span> Grain</div>
+        <div class="item"><span class="dot"></span><span class="n">02</span> Ombre</div>
+        <div class="item"><span class="dot"></span><span class="n">03</span> Collage</div>
+      </div>
+      <div class="top">
+        <div class="titleblock reveal">
+          <div class="kicker">Direction 02 — Références moodboard</div>
+          <h2><b>Ombre</b> &amp; Silhouette</h2>
+          <div class="origin">Piste de Violetta · statut <span class="status gap">à développer</span></div>
+        </div>
+      </div>
+      <div class="gallery">
+        <div class="mat contain reveal d1" style="width:460px; height:447px;">
+          <img src="Deck%20Assets/d2-vio-shadow-crop.jpg" alt="Ombres chinoises — grappe et verre, toast entre amis">
+          <div class="cap">Référence — la direction ombres/silhouettes à développer</div>
+        </div>
+        <div class="mat reveal d2" style="width:240px; height:400px;">
+          <img src="Deck%20Assets/d2-chatgpt-lineart.jpg" alt="Illustration ligne continue, verre à vin">
+          <div class="cap">Piste ligne continue — la plus proche d'un sketch</div>
+        </div>
+        <div class="mat contain reveal d3" style="width:320px; height:237px;">
+          <img src="Deck%20Assets/d2-lineart-reference.jpg" alt="Références affiches en ligne continue">
+          <div class="cap">Référence externe — le style "ligne continue" ailleurs</div>
+        </div>
+      </div>
+      <div class="textcol">
+        <p class="why reveal d3">Photos ou illustrations converties en <b style="color:var(--amber-soft)">ombres/silhouettes</b> sur une surface texturée façon mur ensoleillé — trait continu, minimaliste.</p>
+        <span class="label reveal d4">C'est la direction la moins avancée</span>
+        <ul class="bullet-list tight reveal d4">
+          <li>Pour l'instant : seulement des références photo, pas encore de sketch original</li>
+          <li>C'est normal — le client l'a retenue sur son potentiel, pas sur un rendu déjà abouti</li>
+        </ul>
+        <span class="label reveal d5" style="margin-top:24px;">À faire cette semaine</span>
+        <ul class="bullet-list tight reveal d5">
+          <li>Transformer la référence photo en un vrai motif : grappe ou verre projeté en ombre sur un mur</li>
+          <li>Ou pousser la piste "ligne continue" comme option plus graphique</li>
+        </ul>
+      </div>
+      <div class="pagenum">05 / 09</div>
+    </section>
+
+    <!-- ============ SLIDE 6 — DIRECTION 03: COLLAGE ARTISANAL ============ -->
+    <section class="slide s-dir s-dir3">
+      <div class="grain"></div>
+      <div class="rail">
+        <div class="item"><span class="dot"></span><span class="n">01</span> Grain</div>
+        <div class="item"><span class="dot"></span><span class="n">02</span> Ombre</div>
+        <div class="item"><span class="dot"></span><span class="n">03</span> Collage</div>
+      </div>
+      <div class="top">
+        <div class="titleblock reveal">
+          <div class="kicker">Direction 03 — Conceptions affiches</div>
+          <h2><b>Collage</b> Artisanal</h2>
+          <div class="origin">Piste de Karine · statut <span class="status dev">la plus avancée</span></div>
+        </div>
+      </div>
+      <div class="gallery">
+        <div class="mat contain reveal d1" style="width:460px; height:325px;">
+          <img src="Deck%20Assets/d3-karine-affiches.jpg" alt="Conceptions affiches, Karine">
+          <div class="cap">Sketch original — les 2 affiches présentées en réunion</div>
+        </div>
+        <div class="mat reveal d2" style="width:260px; height:400px;">
+          <img src="Deck%20Assets/d3-gemini-dark.jpg" alt="Variation sombre, vigne et bouteille">
+          <div class="cap">Variation — palette sombre</div>
+        </div>
+        <div class="mat reveal d3" style="width:260px; height:400px;">
+          <img src="Deck%20Assets/d3-gemini-poster.jpg" alt="Variation affiche complète">
+          <div class="cap">Variation — mise en affiche complète</div>
+        </div>
+      </div>
+      <div class="textcol">
+        <p class="why reveal d4">Motif vigne/feuilles en aplats colorés, illustration à la main superposée (bouteille, verre, tonneau) — grain organique, sensation <b style="color:var(--amber-soft)">artisanale</b>.</p>
+        <span class="label reveal d5">Pourquoi ça plaît</span>
+        <ul class="bullet-list tight reveal d5">
+          <li>Décrite par le client comme "plus rapide, plus développée"</li>
+          <li>Rendu fait main — pas d'esthétique IA</li>
+        </ul>
+        <span class="label reveal d6" style="margin-top:24px;">À trancher cette semaine</span>
+        <ul class="bullet-list tight reveal d6">
+          <li>Alléger la densité du motif de fond pour laisser respirer le texte</li>
+          <li>Ne pas utiliser la bouteille comme sujet principal — le raisin et la "nature" (comme éléments de transformation) sont les protagonistes, pas la bouteille</li>
+        </ul>
+      </div>
+      <div class="pagenum">06 / 09</div>
+    </section>
+
+    <!-- ============ SLIDE 7 — CE QUE LE CLIENT VEUT DANS LES 3 CAS ============ -->
+    <section class="slide s-rules">
+      <div class="grain"></div>
+      <div class="rail">
+        <div class="item"><span class="dot"></span><span class="n">01</span> Grain</div>
+        <div class="item"><span class="dot"></span><span class="n">02</span> Ombre</div>
+        <div class="item"><span class="dot"></span><span class="n">03</span> Collage</div>
+      </div>
+      <div class="eyebrow-block">
+        <div class="kicker reveal">Valable pour les 3 directions</div>
+        <h2 class="reveal">Ce que le client veut, <b>quel que soit le choix final</b></h2>
+      </div>
+      <div class="cards">
+        <div class="card reveal d1">
+          <div class="icon">01</div>
+          <h4>Minimalisme</h4>
+          <p>Palette réduite, un ou deux éléments visuels forts. Pas de composition surchargée.</p>
+        </div>
+        <div class="card reveal d2">
+          <div class="icon">02</div>
+          <h4>Fait main</h4>
+          <p>Le rendu "dessiné à la main" est préféré à toute esthétique visiblement générée par IA.</p>
+        </div>
+        <div class="card reveal d3">
+          <div class="icon">03</div>
+          <h4>Modulaire</h4>
+          <p>Chaque élément doit être séparable — pas de composition figée. Doit tenir sur poster, banderole, t-shirt, story Instagram, animation stop-motion.</p>
+        </div>
+      </div>
+      <div class="foot-label reveal d4" style="left:180px; bottom:96px;">Note de palette : le <b style="color:var(--amber-soft)">orange de macération</b> (vin orange) évoque naturellement le vin nature — à garder en tête pour les 3 pistes.</div>
+      <div class="pagenum">07 / 09</div>
+    </section>
+
+    <!-- ============ SLIDE 8 — PROCHAINES ÉTAPES ============ -->
+    <section class="slide s-next">
+      <div class="grain"></div>
+      <div class="rail">
+        <div class="item"><span class="dot"></span><span class="n">01</span> Grain</div>
+        <div class="item"><span class="dot"></span><span class="n">02</span> Ombre</div>
+        <div class="item"><span class="dot"></span><span class="n">03</span> Collage</div>
+      </div>
+      <div class="eyebrow-block">
+        <div class="kicker reveal">Calendrier</div>
+        <h2 class="reveal">Prochaines <b>étapes</b></h2>
+      </div>
+      <div class="timeline">
+        <div class="step reveal d1">
+          <div class="when">Cette semaine</div>
+          <h4>Développer les 3 pistes</h4>
+          <p>Affiner chaque direction retenue en proposition plus aboutie.</p>
+        </div>
+        <div class="step reveal d2">
+          <div class="when">≈ +1 semaine</div>
+          <h4>Envoi intermédiaire</h4>
+          <p>PDF ou visuels envoyés via WhatsApp pour un premier retour du client.</p>
+        </div>
+        <div class="step reveal d3">
+          <div class="when">≈ +3 semaines</div>
+          <h4>Direction finalisée</h4>
+          <p>Une direction confirmée, avec palette et typographie définies.</p>
+        </div>
+        <div class="step reveal d4">
+          <div class="when">Fin août</div>
+          <h4>Livraison finale</h4>
+          <p>Visuels vectorisés + guide typographique, prêts pour l'équipe du festival.</p>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="formats reveal d5">
+        <span class="label">Formats à garder en tête dès maintenant</span>
+        <div class="row">
+          <span class="chip"><span class="dot-sm"></span>Poster</span>
+          <span class="chip"><span class="dot-sm"></span>Banderole</span>
+          <span class="chip"><span class="dot-sm"></span>T-shirt (logo devant, visuel dos)</span>
+          <span class="chip"><span class="dot-sm"></span>Post &amp; story Instagram</span>
+          <span class="chip"><span class="dot-sm"></span>Animation stop-motion</span>
+        </div>
+      </div>
+      <div class="deliverable reveal d6">
+        <span class="label">Livrable principal</span>
+        <p>Fichiers <b style="color:var(--paper)">vectorisés</b> + guide typographique. L'équipe du festival gère elle-même l'adaptation aux formats secondaires.</p>
+      </div>
+      <div class="pagenum">08 / 09</div>
+    </section>
+
+    <!-- ============ SLIDE 9 — CHECKLIST DE LA SEMAINE ============ -->
+    <section class="slide s-close">
+      <div class="grain"></div>
+      <div class="rail">
+        <div class="item"><span class="dot"></span><span class="n">01</span> Grain</div>
+        <div class="item"><span class="dot"></span><span class="n">02</span> Ombre</div>
+        <div class="item"><span class="dot"></span><span class="n">03</span> Collage</div>
+      </div>
+      <div class="content">
+        <div class="kicker reveal">Pour vendredi prochain</div>
+        <h2 class="reveal">Checklist de <b>la semaine</b></h2>
+        <div class="checklist">
+          <div class="checkitem reveal d1"><div class="box"></div><p>Choisir un traitement unique pour Grain de Raisin (trait / riso / papier découpé) et l'appliquer à la palette vin orange.</p></div>
+          <div class="checkitem reveal d2"><div class="box"></div><p>Produire un premier sketch original pour Ombre &amp; Silhouette — pas seulement des références.</p></div>
+          <div class="checkitem reveal d3"><div class="box"></div><p>Alléger le fond de Collage Artisanal pour que le texte respire.</p></div>
+          <div class="checkitem reveal d4"><div class="box"></div><p>Pour chaque piste : noter comment le motif se déclinerait en poster, story Instagram et t-shirt.</p></div>
+        </div>
+      </div>
+      <div class="sidecard reveal d5">
+        <span class="label">Rappel</span>
+        <p>Chaque étudiante développe deux pistes en parallèle : une piste en solo et une piste commune, déposée dans un dossier partagé avec le professeur, jusqu'au retour du client sur l'envoi intermédiaire. La collaboration à part entière commence une fois la direction finale choisie.</p>
+      </div>
+      <div class="pagenum">09 / 09</div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Deck controls: progress + arrows, outside the slide design system -->
+<div class="deck-controls">
+  <button id="prevBtn" aria-label="Slide précédent">‹</button>
+  <span class="count"><span id="curNum">1</span> / <span id="totNum">9</span></span>
+  <button id="nextBtn" aria-label="Slide suivant">›</button>
+</div>
+
+<!-- Edit-mode affordance -->
+<div class="edit-hotzone" id="editHotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Mode édition (touche E)">✏️</button>
+
+<script>
+/* ===========================================
+   SLIDE PRESENTATION CONTROLLER
+   Handles stage scaling, navigation (keyboard/touch/wheel/buttons),
+   the rail highlight per slide, and dot-cluster generation.
+   =========================================== */
+class SlidePresentation {
+  constructor(){
+    this.slides = Array.from(document.querySelectorAll('.slide'));
+    this.current = 0;
+    this.stage = document.getElementById('deckStage');
+    this.railMap = { 's-dir1':0, 's-dir2':1, 's-dir3':2 }; // which rail item to highlight per slide
+    this.setupStageScale();
+    this.setupKeyboardNav();
+    this.setupTouchNav();
+    this.setupWheelNav();
+    this.setupButtons();
+    document.getElementById('totNum').textContent = this.slides.length;
+    this.showSlide(0);
+  }
+  setupStageScale(){
+    const scale = () => {
+      const f = Math.min(window.innerWidth/1920, window.innerHeight/1080);
+      const x = (window.innerWidth - 1920*f)/2, y = (window.innerHeight - 1080*f)/2;
+      this.stage.style.transform = `translate(${x}px, ${y}px) scale(${f})`;
+    };
+    scale(); window.addEventListener('resize', scale);
+  }
+  setupKeyboardNav(){
+    document.addEventListener('keydown', (e) => {
+      if (e.target.getAttribute && e.target.getAttribute('contenteditable') === 'true') return;
+      if (['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)) { e.preventDefault(); this.next(); }
+      if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); this.prev(); }
+    });
+  }
+  setupTouchNav(){
+    let startX = null;
+    this.stage.addEventListener('touchstart', (e) => startX = e.touches[0].clientX, {passive:true});
+    this.stage.addEventListener('touchend', (e) => {
+      if (startX === null) return;
+      const dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) > 60) dx < 0 ? this.next() : this.prev();
+      startX = null;
+    }, {passive:true});
+  }
+  setupWheelNav(){
+    let locked = false;
+    window.addEventListener('wheel', (e) => {
+      if (locked) return;
+      if (Math.abs(e.deltaY) < 24) return;
+      locked = true;
+      e.deltaY > 0 ? this.next() : this.prev();
+      setTimeout(() => locked = false, 650);
+    }, {passive:true});
+  }
+  setupButtons(){
+    document.getElementById('nextBtn').addEventListener('click', () => this.next());
+    document.getElementById('prevBtn').addEventListener('click', () => this.prev());
+  }
+  next(){ this.showSlide(Math.min(this.current+1, this.slides.length-1)); }
+  prev(){ this.showSlide(Math.max(this.current-1, 0)); }
+  showSlide(i){
+    this.current = i;
+    this.slides.forEach((s, idx) => {
+      s.classList.toggle('active', idx === i);
+      s.classList.toggle('visible', idx === i);
+    });
+    document.getElementById('curNum').textContent = i+1;
+    // Highlight the matching rail item on direction slides
+    const active = this.slides[i];
+    const railKey = Object.keys(this.railMap).find(k => active.classList.contains(k));
+    active.querySelectorAll('.rail .item').forEach((item, idx) => {
+      item.classList.toggle('active', railKey !== undefined && this.railMap[railKey] === idx);
+    });
+  }
+}
+const deck = new SlidePresentation();
+
+/* === CSS-drawn grape-dot cluster generator (used on title slide) === */
+(function(){
+  const positions = [
+    [170,10,58],[240,40,64],[300,15,56],[110,60,60],[60,110,54],
+    [190,110,70],[270,110,66],[340,80,50],[130,170,62],[220,190,74],
+    [300,190,60],[370,150,46],[80,220,48],[160,260,58],[240,270,68],
+    [320,260,56],[190,340,52],[260,340,54],[225,410,44]
+  ];
+  const cluster = document.getElementById('clusterTitle');
+  positions.forEach((p,i) => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.style.width = p[2]+'px'; d.style.height = p[2]+'px';
+    d.style.left = p[0]+'px'; d.style.top = p[1]+'px';
+    d.style.opacity = 0.15 + (i%3)*0.08;
+    d.style.transform = 'scale(0)';
+    d.style.transition = `transform .5s cubic-bezier(0.16,1,0.3,1) ${0.15+i*0.035}s`;
+    cluster.appendChild(d);
+    requestAnimationFrame(() => requestAnimationFrame(() => d.style.transform = 'scale(1)'));
+  });
+})();
+
+/* ===========================================
+   INLINE EDITING (default post-draft affordance)
+   Click any text to edit; Ctrl/Cmd+S saves to localStorage
+   and offers a file download of the edited HTML.
+   =========================================== */
+class InlineEditor {
+  constructor(){
+    this.isActive = false;
+    this.storageKey = 'festival-vin-nature-brief-edits';
+    this.toggle = document.getElementById('editToggle');
+    this.hotzone = document.getElementById('editHotzone');
+    this.editableSelectors = 'h1, h2, h3, h4, p, li, .cap, .value, .when, .label, .kicker';
+    this.restoreEdits();
+    this.bindEvents();
+  }
+  bindEvents(){
+    let hideTimeout = null;
+    const show = () => { clearTimeout(hideTimeout); this.toggle.classList.add('show'); };
+    const scheduleHide = () => { hideTimeout = setTimeout(() => { if (!this.isActive) this.toggle.classList.remove('show'); }, 400); };
+    this.hotzone.addEventListener('mouseenter', show);
+    this.hotzone.addEventListener('mouseleave', scheduleHide);
+    this.toggle.addEventListener('mouseenter', show);
+    this.toggle.addEventListener('mouseleave', scheduleHide);
+    this.hotzone.addEventListener('click', () => this.toggleEditMode());
+    this.toggle.addEventListener('click', () => this.toggleEditMode());
+    document.addEventListener('keydown', (e) => {
+      if ((e.key === 'e' || e.key === 'E') && (!e.target.getAttribute || e.target.getAttribute('contenteditable') !== 'true')) {
+        this.toggleEditMode();
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') { e.preventDefault(); this.save(); }
+    });
+  }
+  toggleEditMode(){
+    this.isActive = !this.isActive;
+    this.toggle.classList.toggle('active', this.isActive);
+    document.querySelectorAll(this.editableSelectors).forEach(el => {
+      el.setAttribute('contenteditable', this.isActive ? 'true' : 'false');
+    });
+    if (!this.isActive) this.save();
+  }
+  save(){
+    const data = {};
+    document.querySelectorAll(this.editableSelectors).forEach((el, i) => { data[i] = el.innerHTML; });
+    localStorage.setItem(this.storageKey, JSON.stringify(data));
+  }
+  restoreEdits(){
+    const raw = localStorage.getItem(this.storageKey);
+    if (!raw) return;
+    try {
+      const data = JSON.parse(raw);
+      document.querySelectorAll(this.editableSelectors).forEach((el, i) => { if (data[i] !== undefined) el.innerHTML = data[i]; });
+    } catch (e) { /* ignore corrupt storage */ }
+  }
+}
+new InlineEditor();
+</script>
+</body>
+</html>
