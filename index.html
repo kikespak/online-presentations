@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Presentations</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --card-bg: #ffffff;
+    --border: #e4e4e4;
+    --text: #1a1a1a;
+    --text-dim: #737373;
+    --accent: #1a1a1a;
+    --accent-text: #ffffff;
+    --chip-bg: #f0f0f0;
+    --chip-text: #4d4d4d;
+    --shadow: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-hover: 0 4px 14px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  header {
+    padding: 48px 32px 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    margin: 0 0 6px;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  header p {
+    margin: 0;
+    color: var(--text-dim);
+    font-size: 14px;
+  }
+
+  .filters {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px 32px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .filter-btn {
+    appearance: none;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text-dim);
+    padding: 7px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .filter-btn:hover {
+    border-color: #c9c9c9;
+    color: var(--text);
+  }
+
+  .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-text);
+  }
+
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px 64px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
+  }
+
+  .card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  .card-thumb {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #eee;
+    display: block;
+    object-fit: cover;
+  }
+
+  .card-thumb-placeholder {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: repeating-linear-gradient(135deg, #f2f2f2, #f2f2f2 10px, #ebebeb 10px, #ebebeb 20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+
+  .card-body {
+    padding: 14px 16px 16px;
+  }
+
+  .card-title {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.35;
+    margin: 0 0 10px;
+  }
+
+  .chip {
+    display: inline-block;
+    background: var(--chip-bg);
+    color: var(--chip-text);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 4px 9px;
+    border-radius: 999px;
+  }
+
+  .empty-state {
+    text-align: center;
+    color: var(--text-dim);
+    padding: 64px 0;
+    font-size: 14px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121212;
+      --card-bg: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #f0f0f0;
+      --text-dim: #9a9a9a;
+      --accent: #f0f0f0;
+      --accent-text: #121212;
+      --chip-bg: #2a2a2a;
+      --chip-text: #c9c9c9;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3);
+      --shadow-hover: 0 4px 14px rgba(0,0,0,0.5);
+    }
+    .card-thumb-placeholder {
+      background: repeating-linear-gradient(135deg, #1f1f1f, #1f1f1f 10px, #262626 10px, #262626 20px);
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Presentations</h1>
+  <p>Internal hub — direct links only, not for client sharing.</p>
+</header>
+
+<div class="filters" id="filters"></div>
+
+<main>
+  <div class="grid" id="grid"></div>
+  <div class="empty-state" id="empty-state" style="display:none;">No presentations in this category yet.</div>
+</main>
+
+<script src="manifest.js"></script>
+<script>
+(function () {
+  var presentations = (typeof PRESENTATIONS !== "undefined") ? PRESENTATIONS : [];
+  var filtersEl = document.getElementById("filters");
+  var gridEl = document.getElementById("grid");
+  var emptyStateEl = document.getElementById("empty-state");
+  var activeCategory = "all";
+
+  // Derive distinct categories dynamically from the manifest, preserving first-seen order.
+  var categories = [];
+  var seen = {};
+  presentations.forEach(function (p) {
+    if (p.category && !seen[p.category]) {
+      seen[p.category] = true;
+      categories.push({ category: p.category, categoryLabel: p.categoryLabel || p.category });
+    }
+  });
+
+  function makeFilterButton(label, category) {
+    var btn = document.createElement("button");
+    btn.className = "filter-btn";
+    btn.textContent = label;
+    btn.dataset.category = category;
+    if (category === activeCategory) btn.classList.add("active");
+    btn.addEventListener("click", function () {
+      activeCategory = category;
+      updateFilterButtons();
+      renderCards();
+    });
+    return btn;
+  }
+
+  function updateFilterButtons() {
+    var buttons = filtersEl.querySelectorAll(".filter-btn");
+    buttons.forEach(function (btn) {
+      btn.classList.toggle("active", btn.dataset.category === activeCategory);
+    });
+  }
+
+  function renderFilters() {
+    filtersEl.appendChild(makeFilterButton("All", "all"));
+    categories.forEach(function (c) {
+      filtersEl.appendChild(makeFilterButton(c.categoryLabel, c.category));
+    });
+  }
+
+  function makeCard(p) {
+    var a = document.createElement("a");
+    a.className = "card";
+    a.href = p.url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+
+    if (p.cover) {
+      var img = document.createElement("img");
+      img.className = "card-thumb";
+      img.src = p.cover;
+      img.alt = p.title || "";
+      img.loading = "lazy";
+      img.onerror = function () {
+        var placeholder = document.createElement("div");
+        placeholder.className = "card-thumb-placeholder";
+        placeholder.textContent = "No preview";
+        img.replaceWith(placeholder);
+      };
+      a.appendChild(img);
+    } else {
+      var placeholder = document.createElement("div");
+      placeholder.className = "card-thumb-placeholder";
+      placeholder.textContent = "No preview";
+      a.appendChild(placeholder);
+    }
+
+    var body = document.createElement("div");
+    body.className = "card-body";
+
+    var title = document.createElement("div");
+    title.className = "card-title";
+    title.textContent = p.title || p.id || "Untitled";
+    body.appendChild(title);
+
+    var chip = document.createElement("span");
+    chip.className = "chip";
+    chip.textContent = p.categoryLabel || p.category || "Uncategorized";
+    body.appendChild(chip);
+
+    a.appendChild(body);
+    return a;
+  }
+
+  function renderCards() {
+    gridEl.innerHTML = "";
+    var list = presentations.filter(function (p) {
+      return activeCategory === "all" || p.category === activeCategory;
+    });
+    if (list.length === 0) {
+      emptyStateEl.style.display = "block";
+    } else {
+      emptyStateEl.style.display = "none";
+      list.forEach(function (p) {
+        gridEl.appendChild(makeCard(p));
+      });
+    }
+  }
+
+  renderFilters();
+  renderCards();
+})();
+</script>
+
+</body>
+</html>
