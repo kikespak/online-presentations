@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dragon's Pearl — Client Quotation</title>
+
+<!-- Fonts: IBM Plex Sans (headlines/body) + IBM Plex Mono (labels, ref codes, pricing rows) — the two faces used across Enrique's existing quotation PDFs -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================
+   CSS CUSTOM PROPERTIES — Enrique Spacca Art brand system
+   Sampled directly from the reference PDFs (LogoDesign-Quotation,
+   WBS-Website timeline): periwinkle field, lime headline, black/navy body.
+   =========================================== */
+:root {
+  --periwinkle:   #BBBCFF;   /* primary page field, sampled from reference PDFs */
+  --lime:         #B5EB46;   /* headline / price / accent fill, sampled from reference PDFs */
+  --ink:          #07061a;   /* body text — near-black with a navy cast, sampled as pure black */
+  --navy-bar:     #13122b;   /* solid navy field for photo caption bars + emphasis bars */
+  --paper:        #F5F4FF;   /* light text on navy fields */
+  --rule:         rgba(7,6,26,0.22);
+  --rule-light:   rgba(245,244,255,0.28);
+
+  --font-display: 'IBM Plex Sans', sans-serif;
+  --font-body:    'IBM Plex Sans', sans-serif;
+  --font-mono:    'IBM Plex Mono', monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-normal: 0.7s;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ===========================================
+   FIXED 16:9 STAGE — mandatory base (viewport-base.css, verbatim)
+   =========================================== */
+html, body { width:100%; height:100%; margin:0; overflow:hidden; background: var(--stage-bg,#000); }
+.deck-viewport { position:fixed; inset:0; overflow:hidden; background: var(--stage-bg,#000); }
+.deck-stage { position:absolute; left:0; top:0; width:1920px; height:1080px; overflow:hidden; transform-origin:0 0; background: var(--slide-bg,#fff); }
+.slide { position:absolute; inset:0; width:1920px; height:1080px; overflow:hidden; display:block; visibility:hidden; opacity:0; pointer-events:none; background: var(--slide-bg,#fff); }
+.slide.active, .slide.visible { visibility:visible; opacity:1; pointer-events:auto; z-index:1; }
+img, video, canvas, svg { max-width:100%; max-height:100%; }
+.deck-controls { position:fixed; left:50%; bottom:22px; transform:translateX(-50%); z-index:1000; }
+@media print {
+  html, body { width:1920px; height:auto; overflow:visible; background:#fff; }
+  .deck-viewport { position:static; overflow:visible; background:#fff; }
+  .deck-stage { position:static; width:auto; height:auto; transform:none !important; background:none; }
+  .slide { position:relative; display:block !important; visibility:visible !important; opacity:1 !important; pointer-events:auto !important; width:1920px; height:1080px; break-after:page; page-break-after:always; }
+  .slide:last-child { break-after:auto; page-break-after:auto; }
+  .deck-controls { display:none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration:0.01ms !important; transition-duration:0.2s !important; }
+}
+
+/* ===========================================
+   BASE SLIDE FIELDS
+   =========================================== */
+body { font-family: var(--font-body); }
+.slide.field-periwinkle { background: var(--periwinkle); color: var(--ink); }
+.slide.field-navy { background: var(--navy-bar); color: var(--paper); }
+
+/* ===========================================
+   REVEAL ANIMATION — fade + rise, staggered by data-delay
+   =========================================== */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity var(--duration-normal) var(--ease-out-expo),
+              transform var(--duration-normal) var(--ease-out-expo);
+}
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+.reveal[data-d="1"] { transition-delay: .08s; }
+.reveal[data-d="2"] { transition-delay: .18s; }
+.reveal[data-d="3"] { transition-delay: .28s; }
+.reveal[data-d="4"] { transition-delay: .38s; }
+.reveal[data-d="5"] { transition-delay: .48s; }
+.reveal[data-d="6"] { transition-delay: .58s; }
+
+/* Slow full-bleed photo settle, used on cover + vessel */
+.photo-settle { opacity: 0; transform: scale(1.06); transition: opacity 1.3s var(--ease-out-expo), transform 1.6s var(--ease-out-expo); }
+.slide.visible .photo-settle { opacity: 1; transform: scale(1); }
+
+/* ===========================================
+   TYPOGRAPHY UTILITIES
+   =========================================== */
+.mono { font-family: var(--font-mono); }
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lime);
+  -webkit-text-stroke: 0.6px rgba(7,6,26,0.55);
+}
+.field-navy .kicker { color: var(--lime); -webkit-text-stroke: none; }
+
+/* Lime fill + navy stroke — the reference decks' signature headline treatment on periwinkle fields */
+.h-outline {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--lime);
+  -webkit-text-stroke: 2.5px var(--ink);
+  paint-order: stroke fill;
+  letter-spacing: -0.01em;
+  line-height: 0.98;
+}
+/* Lime fill only — used on navy fields / photo bars where contrast is already high */
+.h-solid {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--lime);
+  letter-spacing: -0.01em;
+  line-height: 0.98;
+}
+
+.body-copy {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1.52;
+  color: var(--ink);
+  max-width: 1060px;
+}
+.field-navy .body-copy { color: var(--paper); }
+
+.rule { height: 1px; background: var(--rule); border: none; }
+.field-navy .rule { background: var(--rule-light); }
+
+/* ===========================================
+   RUNNING HEADER — echoes the PDF spread header row
+   ("Client | Deck | Ref/Date | Author")
+   =========================================== */
+.hdr {
+  position: absolute; top: 64px; left: 96px; right: 96px;
+  display: flex; align-items: baseline; justify-content: space-between;
+  font-family: var(--font-mono); font-size: 15px; font-weight: 500;
+  letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink); opacity: 0.68;
+  padding-bottom: 18px; border-bottom: 1px solid var(--rule);
+}
+.hdr span { white-space: nowrap; }
+.hdr span + span { margin-left: 32px; }
+
+/* Bottom brand mark — small, present on every slide, bottom-right */
+.brand-mark {
+  position: absolute; bottom: 56px; right: 96px;
+  font-family: var(--font-mono); font-weight: 700; font-size: 16px;
+  letter-spacing: 0.04em; color: var(--ink); opacity: 0.82;
+}
+.field-navy .brand-mark { color: var(--paper); }
+
+/* ===========================================
+   CONTENT SLIDE SHELL
+   =========================================== */
+.pad { position: absolute; inset: 0; padding: 0 96px; }
+.content-top { position: absolute; top: 168px; left: 96px; right: 96px; }
+
+/* Small contained corner image card — bordered, flush, no drop shadow (flat brand) */
+.corner-card {
+  position: absolute;
+  border: 1.5px solid var(--ink);
+  overflow: hidden;
+  background: #fff;
+}
+.corner-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.corner-card .cap {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  background: var(--navy-bar); color: var(--paper);
+  font-family: var(--font-mono); font-size: 14px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 12px 18px; line-height: 1.4;
+}
+
+/* ===========================================
+   SLIDE 1 — COVER
+   =========================================== */
+.s-cover .hero { position: absolute; inset: 0; }
+.s-cover .hero img { width: 100%; height: 100%; object-fit: cover; }
+.s-cover .ref-chip {
+  position: absolute; top: 64px; left: 96px;
+  background: var(--navy-bar); color: var(--paper);
+  font-family: var(--font-mono); font-size: 16px; font-weight: 500;
+  letter-spacing: 0.06em; padding: 16px 22px; line-height: 1.6;
+}
+.s-cover .capbar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 420px;
+  background: var(--navy-bar); color: var(--paper);
+  padding: 46px 96px 40px;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.s-cover h1 { font-size: 158px; }
+.s-cover .sub { font-family: var(--font-body); font-size: 27px; font-weight: 400; max-width: 1150px; color: var(--paper); opacity: 0.92; line-height: 1.4; margin-top: 18px; }
+.s-cover .cover-foot { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--font-mono); font-size: 16px; letter-spacing: 0.05em; opacity: 0.85; margin-top: 22px; }
+
+/* ===========================================
+   SLIDE 5 — VESSEL (spectacle photo slide)
+   =========================================== */
+.s-vessel .hero { position: absolute; inset: 0; }
+.s-vessel .hero img { width: 100%; height: 100%; object-fit: cover; }
+.s-vessel .capbar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 340px;
+  background: var(--navy-bar); color: var(--paper);
+  padding: 52px 96px;
+  display: flex; flex-direction: column; gap: 20px;
+}
+.s-vessel h1 { font-size: 108px; }
+.s-vessel .body-copy { font-size: 30px; max-width: 1200px; }
+
+/* ===========================================
+   NARRATIVE SLIDES (2,3,4,6,7,8,9)
+   =========================================== */
+.narr h1 { font-size: 104px; margin-top: 18px; margin-bottom: 34px; }
+.narr .rule { width: 120px; margin-bottom: 34px; }
+
+/* Slide 3 — Convergence: split layout with poetic mono tag column */
+.tagcol { position: absolute; top: 168px; right: 96px; width: 480px; }
+.tagcol .tag {
+  font-family: var(--font-mono); font-size: 26px; font-weight: 600;
+  letter-spacing: 0.03em; padding: 20px 0; border-bottom: 1px solid var(--rule);
+}
+.tagcol .tag:first-child { padding-top: 0; }
+.tagcol .tag:last-child { border-bottom: none; }
+.tagcol .tag em { font-style: normal; color: var(--lime); -webkit-text-stroke: 0.5px var(--ink); }
+
+/* Slide 8 — Weaving: process row list, echoing the PDF's "WHAT IS INCLUDED" table */
+.proc-list { position: absolute; top: 168px; right: 96px; width: 640px; }
+.proc-list .row { display: flex; gap: 28px; padding: 20px 0; border-bottom: 1px solid var(--rule); align-items: baseline; }
+.proc-list .row:last-child { border-bottom: none; }
+.proc-list .step {
+  font-family: var(--font-mono); font-weight: 700; font-size: 20px; letter-spacing: 0.06em;
+  color: var(--ink); opacity: 0.55; width: 88px; flex-shrink: 0;
+}
+.proc-list .txt strong { display: block; font-family: var(--font-mono); font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+.proc-list .txt span { font-family: var(--font-body); font-size: 23px; line-height: 1.4; opacity: 0.9; }
+
+/* Slide 9 — Horizon: closing question as a large pull-line */
+.pull-q {
+  position: absolute; left: 96px; right: 96px; bottom: 108px;
+  font-family: var(--font-display); font-weight: 700; font-size: 72px; line-height: 1.08;
+  color: var(--lime); -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill;
+  max-width: 1500px;
+}
+
+/* ===========================================
+   SLIDE 10 — TIMELINE
+   =========================================== */
+.tl-meta { position: absolute; top: 168px; left: 96px; font-family: var(--font-mono); font-size: 22px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.tl-track { position: absolute; left: 96px; right: 96px; top: 470px; height: 2px; background: var(--lime); }
+.tl-track .tick { position: absolute; top: -7px; width: 2px; height: 16px; background: var(--lime); }
+.tl-track .tick .lbl { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); font-family: var(--font-mono); font-size: 15px; letter-spacing: 0.06em; color: var(--lime); -webkit-text-stroke: 0.4px var(--ink); white-space: nowrap; }
+.tl-table { position: absolute; left: 96px; right: 96px; top: 560px; }
+.tl-table .r { display: grid; grid-template-columns: 90px 340px 1fr; gap: 26px; padding: 15px 0; border-bottom: 1px solid var(--rule); align-items: baseline; }
+.tl-table .r:last-child { border-bottom: none; }
+.tl-table .num { font-family: var(--font-mono); font-weight: 700; font-size: 24px; }
+.tl-table .name { font-family: var(--font-body); font-weight: 600; font-size: 24px; }
+.tl-table .desc { font-family: var(--font-body); font-size: 23px; opacity: 0.85; line-height: 1.4; }
+.tl-note {
+  position: absolute; left: 96px; right: 96px; bottom: 64px;
+  font-family: var(--font-mono); font-size: 17px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; line-height: 1.5; opacity: 0.82; max-width: 1500px;
+}
+
+/* ===========================================
+   SLIDE 11 — QUOTATION
+   =========================================== */
+.q-summary { position: absolute; top: 300px; left: 96px; right: 96px; display: flex; gap: 56px; font-family: var(--font-mono); font-size: 17px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.8; padding-bottom: 22px; border-bottom: 1px solid var(--rule); }
+.q-cards { position: absolute; top: 366px; left: 96px; right: 96px; display: flex; gap: 64px; height: 460px; }
+.q-card { flex: 1; border: 1.5px solid var(--ink); padding: 40px 40px 32px; display: flex; flex-direction: column; }
+.q-card .opt { font-family: var(--font-mono); font-size: 18px; font-weight: 700; letter-spacing: 0.1em; color: var(--ink); opacity: 0.6; margin-bottom: 10px; }
+.q-card .name { font-family: var(--font-display); font-weight: 700; font-size: 46px; line-height: 1.05; margin-bottom: 18px; }
+.q-card .price { font-family: var(--font-display); font-weight: 700; font-size: 128px; line-height: 1; color: var(--lime); -webkit-text-stroke: 2.5px var(--ink); paint-order: stroke fill; margin-bottom: 6px; }
+.q-card .status { font-family: var(--font-mono); font-size: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 20px; opacity: 0.75; }
+.q-card hr.rule { margin-bottom: 20px; }
+.q-card p { font-family: var(--font-body); font-size: 22px; line-height: 1.45; }
+.q-down {
+  position: absolute; left: 96px; right: 96px; top: 862px; height: 76px;
+  background: var(--navy-bar); color: var(--paper);
+  display: flex; align-items: center; padding: 0 36px;
+  font-family: var(--font-mono); font-weight: 600; font-size: 21px; letter-spacing: 0.06em; text-transform: uppercase;
+}
+.q-down b { color: var(--lime); margin-right: 10px; font-size: 24px; }
+.q-foot { position: absolute; left: 96px; right: 96px; bottom: 52px; display: flex; justify-content: space-between; align-items: flex-end; }
+.q-foot .legal { font-family: var(--font-body); font-size: 16px; line-height: 1.5; opacity: 0.75; max-width: 1100px; }
+.q-foot .signoff { font-family: var(--font-mono); font-size: 16px; text-align: right; line-height: 1.5; opacity: 0.9; white-space: nowrap; }
+
+/* ===========================================
+   SLIDE 12 — CLOSING
+   =========================================== */
+.s-close .ref-chip {
+  position: absolute; top: 64px; left: 96px;
+  font-family: var(--font-mono); font-size: 16px; font-weight: 500; letter-spacing: 0.06em; opacity: 0.75;
+}
+.s-close .q { position: absolute; left: 96px; right: 96px; top: 240px; font-size: 120px; max-width: 1600px; }
+.s-close .body-copy { position: absolute; left: 96px; top: 620px; max-width: 1180px; font-size: 32px; }
+.s-close .signoff { position: absolute; left: 96px; bottom: 150px; font-family: var(--font-mono); font-size: 24px; line-height: 1.6; }
+
+/* ===========================================
+   DECK CONTROLS + EDIT AFFORDANCE
+   =========================================== */
+.deck-controls { display: flex; align-items: center; gap: 18px; background: rgba(7,6,26,0.78); backdrop-filter: blur(6px); padding: 10px 20px; border-radius: 999px; }
+.deck-controls button { background: none; border: none; color: var(--paper); font-size: 20px; cursor: pointer; line-height: 1; }
+.deck-controls .count { font-family: var(--font-mono); font-size: 14px; color: var(--paper); opacity: 0.7; min-width: 56px; text-align: center; }
+.edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+.edit-toggle { position: fixed; top: 14px; left: 14px; z-index: 10001; width: 40px; height: 40px; border-radius: 50%; border: none; background: rgba(7,6,26,0.78); font-size: 17px; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+.edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+[contenteditable="true"] { outline: 1.5px dashed var(--lime); outline-offset: 4px; }
+
+</style>
+</head>
+<body>
+<div class="deck-viewport">
+  <main class="deck-stage" id="deckStage">
+
+    <!-- ============================================================
+         SLIDE 1 — COVER
+         Full-bleed hero photo + solid navy caption bar (no gradients).
+         ============================================================ -->
+    <section class="slide s-cover active">
+      <div class="hero"><img class="photo-settle" src="assets/cover-hero.jpg" alt="Corsair 760 trimaran at rest on the green water of Lake Ontario"></div>
+      <div class="ref-chip reveal" data-d="1">REF. DP-2026-07 · DRAFT V1<br>24.07.2026</div>
+      <div class="capbar">
+        <div>
+          <div class="kicker reveal" data-d="2" style="margin-bottom:14px;">Client Quotation — for Joshua, Grace &amp; Anthony</div>
+          <h1 class="h-solid reveal" data-d="3">Dragon's Pearl</h1>
+          <p class="sub reveal" data-d="4">An illustration for the amas — and the sail, if it proves possible — of a Corsair trimaran on Lake Ontario.</p>
+        </div>
+        <div class="cover-foot reveal" data-d="5">
+          <span>Prepared by Árbol {Enrique Spacca}</span>
+          <span>enriquespacca.com</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 2 — THE REUNION
+         ============================================================ -->
+    <section class="slide field-periwinkle narr">
+      <div class="hdr"><span>Dragon's Pearl</span><span>Quotation — Joshua &amp; Grace</span><span>02 / 12</span><span>Enrique Spacca</span></div>
+      <div class="content-top">
+        <div class="kicker reveal" data-d="1">Story — 01</div>
+        <h1 class="h-outline reveal" data-d="2">The&nbsp;Reunion</h1>
+        <hr class="rule reveal" data-d="3">
+        <p class="body-copy reveal" data-d="4">Joshua and Grace found their way back into Enrique's life after years apart — the kind of reconnection that feels less like catching up and more like continuing a conversation that never really stopped. When they asked him to help give shape to something this personal, it landed as a quiet honour: to be trusted, again, with the things that matter most.</p>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 3 — THE CONVERGENCE
+         ============================================================ -->
+    <section class="slide field-periwinkle narr">
+      <div class="hdr"><span>Dragon's Pearl</span><span>Quotation — Joshua &amp; Grace</span><span>03 / 12</span><span>Enrique Spacca</span></div>
+      <div class="content-top" style="max-width:1080px;">
+        <div class="kicker reveal" data-d="1">Story — 02</div>
+        <h1 class="h-outline reveal" data-d="2">The&nbsp;Convergence</h1>
+        <hr class="rule reveal" data-d="3">
+        <p class="body-copy reveal" data-d="4">This project didn't arrive on its own. It's the meeting point of a family looking for an anchor and a greater purpose, a boat already on the water, a lake with a quiet history of its own, and old friends finding each other again at exactly the right moment.</p>
+      </div>
+      <div class="tagcol">
+        <div class="tag reveal" data-d="3"><em>01.</em> An anchor.</div>
+        <div class="tag reveal" data-d="4"><em>02.</em> A greater purpose.</div>
+        <div class="tag reveal" data-d="5"><em>03.</em> Old friends, found again.</div>
+        <div class="tag reveal" data-d="6"><em>04.</em> The right moment.</div>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 4 — THE LIVING WATER
+         ============================================================ -->
+    <section class="slide field-periwinkle narr">
+      <div class="hdr"><span>Dragon's Pearl</span><span>Quotation — Joshua &amp; Grace</span><span>04 / 12</span><span>Enrique Spacca</span></div>
+      <div class="content-top" style="max-width:940px;">
+        <div class="kicker reveal" data-d="1">Story — 03</div>
+        <h1 class="h-outline reveal" data-d="2" style="font-size:92px;">The&nbsp;Living&nbsp;Water</h1>
+        <hr class="rule reveal" data-d="3">
+        <p class="body-copy reveal" data-d="4" style="font-size:29px;">Lake Ontario runs 244 metres deep in places, with a basin that drops sharply rather than sloping gently — leaving little room for coarse matter to settle, and a shorter, more direct path between the earth's healing energies and the surface. Joshua and Grace's family home rests right at its edge, close to water that never stops renewing itself.</p>
+      </div>
+      <div class="corner-card reveal" data-d="5" style="right:96px; top:168px; width:560px; height:660px;">
+        <img src="assets/lake-ontario-profile.jpg" alt="Cross-section profile of the Great Lakes showing Lake Ontario's steep, deep basin">
+        <div class="cap">Lake Ontario — 804 ft / 244 m at its deepest.<br>A steep basin, not a gradual slope.</div>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 5 — THE VESSEL (spectacle photo slide)
+         ============================================================ -->
+    <section class="slide s-vessel">
+      <div class="hero"><img class="photo-settle" src="assets/vessel-hero.jpg" alt="Close view of the Corsair 760's ama hull skimming the water"></div>
+      <div class="capbar">
+        <h1 class="h-solid reveal" data-d="1">The Vessel</h1>
+        <p class="body-copy reveal" data-d="2">The bridge between the family and the lake's healing force — and the place where Anthony and Joshua's bond as sailors keeps deepening, sail after sail.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 6 — THE SYMBOL REVEALED
+         ============================================================ -->
+    <section class="slide field-periwinkle narr">
+      <div class="hdr"><span>Dragon's Pearl</span><span>Quotation — Joshua &amp; Grace</span><span>06 / 12</span><span>Enrique Spacca</span></div>
+      <div class="content-top" style="max-width:1000px;">
+        <div class="kicker reveal" data-d="1">Story — 04</div>
+        <h1 class="h-outline reveal" data-d="2">The&nbsp;Symbol&nbsp;Revealed</h1>
+        <hr class="rule reveal" data-d="3">
+        <p class="body-copy reveal" data-d="4">A pearl is small, precious, and formed slowly, layer by layer, inside something much larger than itself. That's the boat: Dragon's Pearl, resting on the dragon — Lake Ontario and its quiet, healing nature. A vessel this size, carrying a symbol this large, becomes the heart of everything the project is about.</p>
+      </div>
+      <div class="corner-card reveal" data-d="5" style="right:150px; top:200px; width:460px; height:460px; border-radius:50%;">
+        <img src="assets/dragon-medallion.jpg" alt="Blue and white dragon medallion, illustration reference for the pearl-and-dragon symbol">
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 7 — THE CALLING OF THE ARTIST
+         ============================================================ -->
+    <section class="slide field-periwinkle narr">
+      <div class="hdr"><span>Dragon's Pearl</span><span>Quotation — Joshua &amp; Grace</span><span>07 / 12</span><span>Enrique Spacca</span></div>
+      <div class="corner-card reveal" data-d="1" style="left:96px; top:168px; width:520px; height:520px;">
+        <img src="assets/dragon-wave.jpg" alt="Cream dragon relief on deep blue wave pattern, illustration-and-craft reference">
+      </div>
+      <div class="content-top" style="left:696px; max-width:1120px;">
+        <div class="kicker reveal" data-d="2">Story — 05</div>
+        <h1 class="h-outline reveal" data-d="3">The&nbsp;Calling&nbsp;of&nbsp;the&nbsp;Artist</h1>
+        <hr class="rule reveal" data-d="4">
+        <p class="body-copy reveal" data-d="5">Enrique's role is to give the pearl its shape — an illustration carried across the amas, and the sail if it proves possible, so the symbol can do its work in the world. Not decoration, but a catalyst: something for the family, and everyone who steps aboard, to feel every time they're on the water.</p>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 8 — THE WEAVING
+         ============================================================ -->
+    <section class="slide field-periwinkle narr">
+      <div class="hdr"><span>Dragon's Pearl</span><span>Quotation — Joshua &amp; Grace</span><span>08 / 12</span><span>Enrique Spacca</span></div>
+      <div class="content-top" style="max-width:620px;">
+        <div class="kicker reveal" data-d="1">Story — 06</div>
+        <h1 class="h-outline reveal" data-d="2" style="font-size:92px;">The&nbsp;Weaving</h1>
+        <hr class="rule reveal" data-d="3">
+        <p class="body-copy reveal" data-d="4" style="font-size:28px;">This is meant to stay light. A few calls, a handful of questions, sketches shared back for a reaction rather than a committee review. Enrique carries the weight of the work — the family's part is simply to stay close enough to recognise themselves in it.</p>
+      </div>
+      <div class="proc-list">
+        <div class="row reveal" data-d="3"><div class="step">01</div><div class="txt"><strong>Talk</strong><span>A first call to walk through the story and the boat.</span></div></div>
+        <div class="row reveal" data-d="4"><div class="step">02</div><div class="txt"><strong>Sketch</strong><span>Early directions for the amas, shared for a reaction.</span></div></div>
+        <div class="row reveal" data-d="5"><div class="step">03</div><div class="txt"><strong>Refine</strong><span>A short round of adjustments, together.</span></div></div>
+        <div class="row reveal" data-d="6"><div class="step">04</div><div class="txt"><strong>Finish</strong><span>Final artwork, ready to apply to the boat.</span></div></div>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 9 — THE HORIZON
+         ============================================================ -->
+    <section class="slide field-periwinkle narr">
+      <div class="hdr"><span>Dragon's Pearl</span><span>Quotation — Joshua &amp; Grace</span><span>09 / 12</span><span>Enrique Spacca</span></div>
+      <div class="content-top" style="top:160px; max-width:1300px;">
+        <div class="kicker reveal" data-d="1">Story — 07</div>
+        <h1 class="h-outline reveal" data-d="2" style="font-size:96px;">The&nbsp;Horizon</h1>
+        <hr class="rule reveal" data-d="3">
+        <p class="body-copy reveal" data-d="4" style="font-size:29px; max-width:1200px;">Once Dragon's Pearl is finished and afloat, it doesn't have to be the end of the story. The same symbol that gives the boat its meaning could open doors — workshops on the water, gatherings around what the lake offers, even a book one day. The illustration is a beginning, not a full stop.</p>
+      </div>
+      <div class="pull-q reveal" data-d="5">What do you imagine this project could become?</div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 10 — TIMELINE
+         Field conventions per WBS-Website_project-timeline.pdf.
+         ============================================================ -->
+    <section class="slide field-periwinkle">
+      <div class="hdr"><span>Dragon's Pearl</span><span>Quotation — Joshua &amp; Grace</span><span>10 / 12</span><span>Enrique Spacca</span></div>
+      <div class="content-top" style="max-width:1100px;">
+        <div class="kicker reveal" data-d="1">Process</div>
+        <h1 class="h-outline reveal" data-d="2" style="font-size:96px;">The&nbsp;Timeline</h1>
+      </div>
+      <div class="tl-meta reveal" data-d="3">Timeline · ~2 months, told as a storyline — not a rigid schedule</div>
+      <div class="tl-track reveal" data-d="4" id="tlTrack"></div>
+      <div class="tl-table">
+        <div class="row r reveal" data-d="4"><div class="num">01</div><div class="name">First call</div><div class="desc">Sharing the vision and walking through the story behind Dragon's Pearl.</div></div>
+        <div class="row r reveal" data-d="4"><div class="num">02</div><div class="name">Sketches</div><div class="desc">First illustration directions for the amas — and the sail, if confirmed — shared for a reaction.</div></div>
+        <div class="row r reveal" data-d="5"><div class="num">03</div><div class="name">Refinement</div><div class="desc">A short call or two with Joshua, Grace, and Anthony to tune shapes, symbolism, and colour.</div></div>
+        <div class="row r reveal" data-d="5"><div class="num">04</div><div class="name">Final artwork</div><div class="desc">The finished illustration files, prepared and ready to apply.</div></div>
+        <div class="row r reveal" data-d="6"><div class="num">05</div><div class="name">Application</div><div class="desc">Painting the amas — and coordinating the sail print, if it's a go.</div></div>
+        <div class="row r reveal" data-d="6"><div class="num">06</div><div class="name">On the water</div><div class="desc">Dragon's Pearl, afloat on Lake Ontario.</div></div>
+      </div>
+      <div class="tl-note reveal" data-d="6">A gentle note: timings stay soft. Most of the work happens on Enrique's side — a few calls and sketches are all that's needed to stay aligned.</div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 11 — QUOTATION
+         Field conventions per LogoDesign-Quotation.pdf, minus the TVA line.
+         ============================================================ -->
+    <section class="slide field-periwinkle">
+      <div class="hdr"><span>Dragon's Pearl</span><span>Quotation — Joshua &amp; Grace</span><span>11 / 12</span><span>Enrique Spacca</span></div>
+      <div class="content-top" style="max-width:900px;">
+        <div class="kicker reveal" data-d="1">Quotation</div>
+        <h1 class="h-outline reveal" data-d="2" style="font-size:88px;">The&nbsp;Quotation</h1>
+      </div>
+      <div class="q-summary reveal" data-d="3">
+        <span>Ref. DP-2026-07 · Draft v1</span>
+        <span>Prices in EUR (€)</span>
+        <span>Valid for 30 days from 24.07.2026</span>
+      </div>
+      <div class="q-cards">
+        <div class="q-card reveal" data-d="4">
+          <div class="opt">Option A</div>
+          <div class="name">Amas + Sail</div>
+          <div class="price">€1,200</div>
+          <div class="status">Sail pending print confirmation</div>
+          <hr class="rule">
+          <p>Full illustration across both amas, plus the sail. This option depends on Joshua confirming the sail can be printed — once that's settled, it's a go.</p>
+        </div>
+        <div class="q-card reveal" data-d="5">
+          <div class="opt">Option B</div>
+          <div class="name">Amas Only</div>
+          <div class="price">€700</div>
+          <div class="status">Confirmed &amp; ready</div>
+          <hr class="rule">
+          <p>Full illustration across both amas. Confirmed and ready to begin whenever you are.</p>
+        </div>
+      </div>
+      <div class="q-down reveal" data-d="6"><b>€300</b> downpayment to begin — either option, same start.</div>
+      <div class="q-foot reveal" data-d="6">
+        <div class="legal">All prices are in EUR (€) and exclude materials and any third-party costs (marine-grade paint, primer, or sail printing/production). Valid for 30 days from the date above.</div>
+        <div class="signoff">Prepared by Árbol {Enrique Spacca}<br>enriquespacca.com</div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 12 — CLOSING
+         ============================================================ -->
+    <section class="slide field-periwinkle s-close">
+      <div class="ref-chip reveal" data-d="1">Dragon's Pearl · 24.07.2026</div>
+      <div class="kicker reveal" data-d="1" style="position:absolute; top:64px; right:96px;">12 / 12</div>
+      <h1 class="q h-outline reveal" data-d="2">What do you imagine this project could become?</h1>
+      <p class="body-copy reveal" data-d="3">Whatever the answer, Dragon's Pearl starts here — with the amas, the water, and the story you've already been living. Thank you for trusting me with it.</p>
+      <div class="signoff reveal" data-d="4">With warmth,<br><strong>Árbol {Enrique Spacca}</strong></div>
+      <div class="brand-mark">enriquespacca.com</div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Deck controls: progress + arrows, outside the slide design system -->
+<div class="deck-controls">
+  <button id="prevBtn" aria-label="Previous slide">‹</button>
+  <span class="count"><span id="curNum">1</span> / <span id="totNum">12</span></span>
+  <button id="nextBtn" aria-label="Next slide">›</button>
+</div>
+
+<!-- Edit-mode affordance -->
+<div class="edit-hotzone" id="editHotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Edit mode (E)">✏️</button>
+
+<script>
+/* ===========================================
+   TIMELINE TICK GENERATOR
+   Draws 6 evenly-spaced ticks + labels along the timeline track,
+   matching the WBS reference's "WEEK 1...WEEK 6" tick convention.
+   =========================================== */
+(function(){
+  const track = document.getElementById('tlTrack');
+  const labels = ['Step 1','Step 2','Step 3','Step 4','Step 5','Step 6'];
+  const width = 1920 - 96 - 96;
+  labels.forEach((lbl, i) => {
+    const t = document.createElement('div');
+    t.className = 'tick';
+    t.style.left = (i * (width/(labels.length-1))) + 'px';
+    const l = document.createElement('div');
+    l.className = 'lbl';
+    l.textContent = lbl;
+    t.appendChild(l);
+    track.appendChild(t);
+  });
+})();
+
+/* ===========================================
+   SLIDE PRESENTATION CONTROLLER
+   Handles stage scaling and navigation (keyboard/touch/wheel/buttons).
+   =========================================== */
+class SlidePresentation {
+  constructor(){
+    this.slides = Array.from(document.querySelectorAll('.slide'));
+    this.current = 0;
+    this.stage = document.getElementById('deckStage');
+    this.setupStageScale();
+    this.setupKeyboardNav();
+    this.setupTouchNav();
+    this.setupWheelNav();
+    this.setupButtons();
+    document.getElementById('totNum').textContent = this.slides.length;
+    this.showSlide(0);
+  }
+  setupStageScale(){
+    const scale = () => {
+      const f = Math.min(window.innerWidth/1920, window.innerHeight/1080);
+      const x = (window.innerWidth - 1920*f)/2, y = (window.innerHeight - 1080*f)/2;
+      this.stage.style.transform = `translate(${x}px, ${y}px) scale(${f})`;
+    };
+    scale(); window.addEventListener('resize', scale);
+  }
+  setupKeyboardNav(){
+    document.addEventListener('keydown', (e) => {
+      if (e.target.getAttribute && e.target.getAttribute('contenteditable') === 'true') return;
+      if (['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)) { e.preventDefault(); this.next(); }
+      if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); this.prev(); }
+    });
+  }
+  setupTouchNav(){
+    let startX = null;
+    this.stage.addEventListener('touchstart', (e) => startX = e.touches[0].clientX, {passive:true});
+    this.stage.addEventListener('touchend', (e) => {
+      if (startX === null) return;
+      const dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) > 60) dx < 0 ? this.next() : this.prev();
+      startX = null;
+    }, {passive:true});
+  }
+  setupWheelNav(){
+    let locked = false;
+    window.addEventListener('wheel', (e) => {
+      if (locked) return;
+      if (Math.abs(e.deltaY) < 24) return;
+      locked = true;
+      e.deltaY > 0 ? this.next() : this.prev();
+      setTimeout(() => locked = false, 650);
+    }, {passive:true});
+  }
+  setupButtons(){
+    document.getElementById('nextBtn').addEventListener('click', () => this.next());
+    document.getElementById('prevBtn').addEventListener('click', () => this.prev());
+  }
+  next(){ this.showSlide(Math.min(this.current+1, this.slides.length-1)); }
+  prev(){ this.showSlide(Math.max(this.current-1, 0)); }
+  showSlide(i){
+    this.current = i;
+    this.slides.forEach((s, idx) => {
+      s.classList.toggle('active', idx === i);
+      s.classList.toggle('visible', idx === i);
+    });
+    document.getElementById('curNum').textContent = i+1;
+  }
+}
+const deck = new SlidePresentation();
+
+/* ===========================================
+   INLINE EDITING (default post-draft affordance)
+   Click any text to edit; Ctrl/Cmd+S saves to localStorage.
+   =========================================== */
+class InlineEditor {
+  constructor(){
+    this.isActive = false;
+    this.storageKey = 'dragons-pearl-quotation-edits';
+    this.toggle = document.getElementById('editToggle');
+    this.hotzone = document.getElementById('editHotzone');
+    this.editableSelectors = 'h1, p, li, span, div.name, div.price, div.status, .lbl';
+    this.restoreEdits();
+    this.bindEvents();
+  }
+  bindEvents(){
+    let hideTimeout = null;
+    const show = () => { clearTimeout(hideTimeout); this.toggle.classList.add('show'); };
+    const scheduleHide = () => { hideTimeout = setTimeout(() => { if (!this.isActive) this.toggle.classList.remove('show'); }, 400); };
+    this.hotzone.addEventListener('mouseenter', show);
+    this.hotzone.addEventListener('mouseleave', scheduleHide);
+    this.toggle.addEventListener('mouseenter', show);
+    this.toggle.addEventListener('mouseleave', scheduleHide);
+    this.hotzone.addEventListener('click', () => this.toggleEditMode());
+    this.toggle.addEventListener('click', () => this.toggleEditMode());
+    document.addEventListener('keydown', (e) => {
+      if ((e.key === 'e' || e.key === 'E') && (!e.target.getAttribute || e.target.getAttribute('contenteditable') !== 'true')) {
+        this.toggleEditMode();
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') { e.preventDefault(); this.save(); }
+    });
+  }
+  toggleEditMode(){
+    this.isActive = !this.isActive;
+    this.toggle.classList.toggle('active', this.isActive);
+    document.querySelectorAll('.slide h1, .slide p, .slide .body-copy, .slide .name, .slide .price, .slide .status, .slide .sub, .slide .desc, .slide .legal').forEach(el => {
+      el.setAttribute('contenteditable', this.isActive ? 'true' : 'false');
+    });
+    if (!this.isActive) this.save();
+  }
+  save(){
+    const data = {};
+    document.querySelectorAll('.slide h1, .slide p, .slide .body-copy, .slide .name, .slide .price, .slide .status, .slide .sub, .slide .desc, .slide .legal').forEach((el, i) => { data[i] = el.innerHTML; });
+    localStorage.setItem(this.storageKey, JSON.stringify(data));
+  }
+  restoreEdits(){
+    const raw = localStorage.getItem(this.storageKey);
+    if (!raw) return;
+    try {
+      const data = JSON.parse(raw);
+      document.querySelectorAll('.slide h1, .slide p, .slide .body-copy, .slide .name, .slide .price, .slide .status, .slide .sub, .slide .desc, .slide .legal').forEach((el, i) => { if (data[i] !== undefined) el.innerHTML = data[i]; });
+    } catch (e) { /* ignore corrupt storage */ }
+  }
+}
+new InlineEditor();
+</script>
+</body>
+</html>
