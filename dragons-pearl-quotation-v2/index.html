@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dragon's Pearl — Client Quotation (Draft v3)</title>
+
+<!-- Fonts: IBM Plex Sans (headlines/body) + IBM Plex Mono (labels, ref codes, pricing rows) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================
+   CSS CUSTOM PROPERTIES — Enrique Spacca Art brand system
+   v3 correction: font color is pure black (softened to ~82% opacity for
+   harmony with the lilac field), not the navy-cast ink used in v1/v2.
+   =========================================== */
+:root {
+  --periwinkle:   #BBBCFF;   /* primary page field */
+  --lime:         #B5EB46;   /* headline / price / accent fill */
+  --ink:          #000000;   /* pure black — borders, rules, headline stroke */
+  --ink-text:     rgba(0,0,0,0.82); /* body/base text color on periwinkle fields */
+  --lilac-dark:   #a8a9fc;   /* darker lilac — accent bars (e.g. downpayment strip); no navy anywhere in this deck */
+  --paper:        #F5F4FF;   /* light text on the floating deck-controls overlay (not a slide color) */
+  --rule:         rgba(0,0,0,0.18);
+
+  --font-display: 'IBM Plex Sans', sans-serif;
+  --font-body:    'IBM Plex Sans', sans-serif;
+  --font-mono:    'IBM Plex Mono', monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-normal: 0.7s;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ===========================================
+   FIXED 16:9 STAGE — mandatory base
+   =========================================== */
+html, body { width:100%; height:100%; margin:0; overflow:hidden; background: var(--stage-bg,#000); }
+.deck-viewport { position:fixed; inset:0; overflow:hidden; background: var(--stage-bg,#000); }
+.deck-stage { position:absolute; left:0; top:0; width:1920px; height:1080px; overflow:hidden; transform-origin:0 0; background: var(--slide-bg,#fff); }
+.slide { position:absolute; inset:0; width:1920px; height:1080px; overflow:hidden; display:block; visibility:hidden; opacity:0; pointer-events:none; background: var(--slide-bg,#fff); }
+.slide.active, .slide.visible { visibility:visible; opacity:1; pointer-events:auto; z-index:1; }
+img, video, canvas, svg { max-width:100%; max-height:100%; }
+.deck-controls { position:fixed; left:50%; bottom:22px; transform:translateX(-50%); z-index:1000; }
+@media print {
+  html, body { width:1920px; height:auto; overflow:visible; background:#fff; }
+  .deck-viewport { position:static; overflow:visible; background:#fff; }
+  .deck-stage { position:static; width:auto; height:auto; transform:none !important; background:none; }
+  .slide { position:relative; display:block !important; visibility:visible !important; opacity:1 !important; pointer-events:auto !important; width:1920px; height:1080px; break-after:page; page-break-after:always; }
+  .slide:last-child { break-after:auto; page-break-after:auto; }
+  .deck-controls { display:none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration:0.01ms !important; transition-duration:0.2s !important; }
+}
+
+/* ===========================================
+   BASE SLIDE FIELD
+   v3 correction: every slide, including the cover, stays on the lilac
+   field. No navy full-slide background anywhere.
+   =========================================== */
+body { font-family: var(--font-body); }
+.slide.field-periwinkle { background: var(--periwinkle); color: var(--ink-text); }
+
+/* ===========================================
+   REVEAL ANIMATION
+   =========================================== */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity var(--duration-normal) var(--ease-out-expo),
+              transform var(--duration-normal) var(--ease-out-expo);
+}
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+.reveal[data-d="1"] { transition-delay: .08s; }
+.reveal[data-d="2"] { transition-delay: .18s; }
+.reveal[data-d="3"] { transition-delay: .28s; }
+.reveal[data-d="4"] { transition-delay: .38s; }
+.reveal[data-d="5"] { transition-delay: .48s; }
+.reveal[data-d="6"] { transition-delay: .58s; }
+
+/* ===========================================
+   TYPOGRAPHY UTILITIES
+   =========================================== */
+.mono { font-family: var(--font-mono); }
+
+/* v3 correction: eyebrow / small labels are plain bright lime, no stroke —
+   the thin outline made them unreadable at this size. */
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lime);
+}
+
+/* Lime fill + black stroke — large display headline treatment (kept: this
+   is the deck's signature look, and legible at this size). */
+.h-outline {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--lime);
+  -webkit-text-stroke: 2.5px var(--ink);
+  paint-order: stroke fill;
+  letter-spacing: -0.01em;
+  line-height: 0.98;
+}
+.h-solid {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--lime);
+  letter-spacing: -0.01em;
+  line-height: 0.98;
+}
+
+.body-copy {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1.52;
+  color: var(--ink-text);
+  max-width: 1060px;
+}
+
+.rule { height: 1px; background: var(--rule); border: none; }
+
+/* ===========================================
+   RUNNING HEADER (slides 2–4)
+   =========================================== */
+.hdr {
+  position: absolute; top: 64px; left: 96px; right: 96px;
+  display: flex; align-items: baseline; justify-content: space-between;
+  font-family: var(--font-mono); font-size: 15px; font-weight: 500;
+  letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink); opacity: 0.62;
+  padding-bottom: 18px; border-bottom: 1px solid var(--rule);
+}
+.hdr span { white-space: nowrap; }
+.hdr span + span { margin-left: 32px; }
+
+.brand-mark {
+  position: absolute; bottom: 56px; right: 96px;
+  font-family: var(--font-mono); font-weight: 700; font-size: 16px;
+  letter-spacing: 0.04em; color: var(--ink); opacity: 0.78;
+}
+
+/* ===========================================
+   CONTENT SLIDE SHELL
+   =========================================== */
+.pad { position: absolute; inset: 0; padding: 0 96px; }
+.content-top { position: absolute; top: 168px; left: 96px; right: 96px; }
+
+/* Small contained corner image card — bordered, flush, no drop shadow */
+.corner-card {
+  position: absolute;
+  border: 1.5px solid var(--ink);
+  overflow: hidden;
+  background: #fff;
+}
+.corner-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ===========================================
+   SLIDE 1 — COVER
+   v3 correction: no hero photo, no navy capbar — plain lilac field,
+   centered title block, logo in the footer per the WBS reference.
+   =========================================== */
+/* Background motif: grayscale dragon/cloud artwork multiplied onto the
+   lilac field (duotone imprint, per the WBS reference's spiral graphic),
+   masked to reveal only from behind the title rightward. */
+.s-cover .cover-motif {
+  position: absolute; inset: 0; background-size: cover; background-position: center;
+  background-image: url('assets/cover-motif.png');
+  mix-blend-mode: multiply; opacity: 0.85;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 32%, black 68%, black 100%);
+  mask-image: linear-gradient(to right, transparent 0%, transparent 32%, black 68%, black 100%);
+}
+.s-cover .ref-chip {
+  position: absolute; top: 64px; left: 96px;
+  border: 1.5px solid var(--ink);
+  font-family: var(--font-mono); font-size: 16px; font-weight: 500;
+  letter-spacing: 0.06em; padding: 16px 22px; line-height: 1.6;
+  color: var(--ink-text);
+}
+.s-cover .cover-mid { position: absolute; left: 96px; right: 96px; top: 400px; }
+.s-cover h1 { font-size: 168px; }
+.s-cover .kicker { margin-bottom: 22px; }
+.s-cover .sub { font-size: 30px; max-width: 1150px; margin-top: 26px; }
+.s-cover .cover-foot {
+  position: absolute; left: 96px; right: 96px; bottom: 72px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.s-cover .cover-logo { height: 68px; width: auto; display: block; }
+.s-cover .foot-right {
+  font-family: var(--font-mono); font-size: 16px; letter-spacing: 0.04em;
+  color: var(--ink-text); text-align: right; line-height: 1.7;
+}
+.s-cover .foot-right a { color: var(--ink-text); text-decoration: none; border-bottom: 1px solid var(--rule); }
+
+/* ===========================================
+   NARRATIVE SLIDES (2, 3)
+   =========================================== */
+.narr h1 { font-size: 104px; margin-top: 18px; margin-bottom: 34px; }
+.narr .rule { width: 120px; margin-bottom: 34px; }
+
+/* Slide 2 — The Pearl: body copy + circular medallion image */
+.s-intro .content-top { max-width: 1080px; }
+.s-intro .body-copy + .body-copy { margin-top: 26px; }
+.s-intro .medallion {
+  position: absolute; right: 130px; top: 220px; width: 480px; height: 480px;
+  border-radius: 50%;
+}
+
+/* Slide 3 — The Weaving: left copy + right six-row process list */
+.proc-list { position: absolute; top: 250px; right: 96px; width: 700px; }
+.proc-list .row { display: flex; gap: 26px; padding: 15px 0; border-bottom: 1px solid var(--rule); align-items: baseline; }
+.proc-list .row:last-child { border-bottom: none; }
+.proc-list .step {
+  font-family: var(--font-mono); font-weight: 700; font-size: 19px; letter-spacing: 0.06em;
+  color: var(--ink); opacity: 0.5; width: 76px; flex-shrink: 0;
+}
+.proc-list .txt strong { display: block; font-family: var(--font-mono); font-size: 19px; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 5px; }
+.proc-list .txt span { font-family: var(--font-body); font-size: 21px; line-height: 1.35; opacity: 0.92; }
+.s-process .content-top { max-width: 640px; }
+.s-process .body-copy { font-size: 27px; }
+.tl-note {
+  position: absolute; left: 96px; right: 96px; bottom: 78px;
+  font-family: var(--font-mono); font-size: 17px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; line-height: 1.5; opacity: 0.75; max-width: 1500px;
+}
+
+/* ===========================================
+   SLIDE 4 — QUOTATION
+   =========================================== */
+.q-summary { position: absolute; top: 300px; left: 96px; right: 96px; display: flex; gap: 56px; font-family: var(--font-mono); font-size: 17px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.75; padding-bottom: 22px; border-bottom: 1px solid var(--rule); }
+.q-cards { position: absolute; top: 366px; left: 96px; right: 96px; display: flex; gap: 64px; height: 480px; }
+.q-card { flex: 1; border: 1.5px solid var(--ink); padding: 38px 40px 26px; display: flex; flex-direction: column; }
+.q-card .opt { font-family: var(--font-mono); font-size: 18px; font-weight: 700; letter-spacing: 0.1em; color: var(--ink); opacity: 0.55; margin-bottom: 10px; }
+.q-card .name { font-family: var(--font-display); font-weight: 700; font-size: 44px; line-height: 1.05; margin-bottom: 16px; color: var(--ink-text); }
+.q-card .price { font-family: var(--font-display); font-weight: 700; font-size: 116px; line-height: 1; color: var(--lime); -webkit-text-stroke: 2.5px var(--ink); paint-order: stroke fill; margin-bottom: 6px; }
+.q-card .status { font-family: var(--font-mono); font-size: 15px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 18px; opacity: 0.7; }
+.q-card hr.rule { margin-bottom: 18px; }
+.q-card p { font-family: var(--font-body); font-size: 21px; line-height: 1.42; color: var(--ink-text); flex: 1; }
+.q-card .includes {
+  font-family: var(--font-mono); font-size: 15px; letter-spacing: 0.03em; opacity: 0.72;
+  margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--rule); line-height: 1.6;
+}
+.q-down {
+  position: absolute; left: 96px; right: 96px; top: 862px; height: 76px;
+  background: var(--lilac-dark); color: var(--ink-text);
+  display: flex; align-items: center; padding: 0 36px;
+  font-family: var(--font-mono); font-weight: 600; font-size: 21px; letter-spacing: 0.06em; text-transform: uppercase;
+}
+.q-down b { color: var(--lime); -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; margin-right: 10px; font-size: 24px; }
+.q-foot { position: absolute; left: 96px; right: 96px; bottom: 52px; display: flex; justify-content: space-between; align-items: flex-end; }
+.q-foot .legal { font-family: var(--font-body); font-size: 16px; line-height: 1.5; opacity: 0.68; max-width: 1100px; color: var(--ink-text); }
+.q-foot .signoff { font-family: var(--font-mono); font-size: 16px; text-align: right; line-height: 1.5; opacity: 0.85; white-space: nowrap; color: var(--ink-text); }
+
+/* ===========================================
+   DECK CONTROLS + EDIT AFFORDANCE
+   =========================================== */
+.deck-controls { display: flex; align-items: center; gap: 18px; background: rgba(0,0,0,0.72); backdrop-filter: blur(6px); padding: 10px 20px; border-radius: 999px; }
+.deck-controls button { background: none; border: none; color: var(--paper); font-size: 20px; cursor: pointer; line-height: 1; }
+.deck-controls .count { font-family: var(--font-mono); font-size: 14px; color: var(--paper); opacity: 0.7; min-width: 56px; text-align: center; }
+.edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+.edit-toggle { position: fixed; top: 14px; left: 14px; z-index: 10001; width: 40px; height: 40px; border-radius: 50%; border: none; background: rgba(0,0,0,0.72); font-size: 17px; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+.edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+[contenteditable="true"] { outline: 1.5px dashed var(--lime); outline-offset: 4px; }
+
+</style>
+</head>
+<body>
+<div class="deck-viewport">
+  <main class="deck-stage" id="deckStage">
+
+    <!-- ============================================================
+         SLIDE 1 — COVER
+         ============================================================ -->
+    <section class="slide field-periwinkle s-cover active">
+      <div class="cover-motif"></div>
+      <div class="ref-chip reveal" data-d="1">REF. DP-2026-07 · DRAFT V3<br>26.07.2026</div>
+      <div class="cover-mid">
+        <div class="kicker reveal" data-d="2">Client Quotation for Joshua, Grace &amp; Anthony</div>
+        <h1 class="h-outline reveal" data-d="3">Dragon's Pearl</h1>
+        <p class="sub body-copy reveal" data-d="4">An illustration for the amas of a Corsair trimaran on Lake Ontario, and for the sail once printing is confirmed.</p>
+      </div>
+      <div class="cover-foot reveal" data-d="5">
+        <img class="cover-logo" src="assets/ES-ART_Logo-label_small.svg" alt="Enrique Spacca Art logo">
+        <div class="foot-right">
+          <span>Enrique Spacca Art · Prepared by Árbol {Enrique Spacca}</span><br>
+          <a href="http://enriquespacca.com">enriquespacca.com</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 2 — THE PEARL (intro)
+         ============================================================ -->
+    <section class="slide field-periwinkle narr s-intro">
+      <div class="hdr"><span>Dragon's Pearl</span><span>Quotation — Joshua &amp; Grace</span><span>02 / 04</span><span>Enrique Spacca</span></div>
+      <div class="content-top">
+        <div class="kicker reveal" data-d="1">Introduction</div>
+        <h1 class="h-outline reveal" data-d="2">The&nbsp;Pearl</h1>
+        <hr class="rule reveal" data-d="3">
+        <p class="body-copy reveal" data-d="4">Lake Ontario drops 245 metres straight down, with no slope for coarse matter to gather on. Its cleansing runs direct from the depths to the surface, which is why the water at the edge of your home behaves like a fountain that keeps on healing.</p>
+        <p class="body-copy reveal" data-d="5">The boat is the pearl. Small against that water, precious, a bridge between the family and the lake's healing force, and the mark on which that bond can keep growing.</p>
+        <p class="body-copy reveal" data-d="6">My mission would be to give the pearl its shape. An illustration carried across both amas, and across the sail if budget proves possible, so the symbol acts as a catalyst every time someone steps aboard.</p>
+      </div>
+      <div class="corner-card medallion reveal" data-d="5">
+        <img src="assets/dragon-medallion.jpg" alt="Blue and white dragon medallion, illustration reference for the pearl-and-dragon symbol">
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 3 — THE WEAVING (process)
+         ============================================================ -->
+    <section class="slide field-periwinkle narr s-process">
+      <div class="hdr"><span>Dragon's Pearl</span><span>Quotation — Joshua &amp; Grace</span><span>03 / 04</span><span>Enrique Spacca</span></div>
+      <div class="content-top">
+        <div class="kicker reveal" data-d="1">Process</div>
+        <h1 class="h-outline reveal" data-d="2">The&nbsp;Weaving</h1>
+        <hr class="rule reveal" data-d="3">
+        <p class="body-copy reveal" data-d="4">For this project to be truly alive, I’d like to weave a storyline rather than a fixed production pipe. My vision is to include Joshua, Grace, and Anthony in the process through a series of calls, exercises, questions, ponders and even drawings and sketches. It could grow into a complete mini-workshop.</p>
+      </div>
+      <div class="proc-list">
+        <div class="row reveal" data-d="3"><div class="step">01</div><div class="txt"><strong>Talk</strong><span>A first call to walk through the story, the boat, and the symbol.</span></div></div>
+        <div class="row reveal" data-d="3"><div class="step">02</div><div class="txt"><strong>Listen</strong><span>Questions and small exercises with Joshua, Grace and Anthony.</span></div></div>
+        <div class="row reveal" data-d="4"><div class="step">03</div><div class="txt"><strong>Sketch</strong><span>First directions for the amas, and the sail if confirmed, shared for a reaction.</span></div></div>
+        <div class="row reveal" data-d="4"><div class="step">04</div><div class="txt"><strong>Refine</strong><span>One round of adjustments, decided together.</span></div></div>
+        <div class="row reveal" data-d="5"><div class="step">05</div><div class="txt"><strong>Finish</strong><span>Final artwork files, prepared and ready to apply.</span></div></div>
+        <div class="row reveal" data-d="5"><div class="step">06</div><div class="txt"><strong>Apply</strong><span>The amas and the sail print coordinated once it is a go.</span></div></div>
+      </div>
+      <div class="tl-note reveal" data-d="6">Around two months, held as a storyline rather than a fixed schedule. Timings stay soft, and the door stays open for what the project becomes once the pearl is finished.</div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 4 — THE QUOTATION
+         ============================================================ -->
+    <section class="slide field-periwinkle">
+      <div class="hdr"><span>Dragon's Pearl</span><span>Quotation — Joshua &amp; Grace</span><span>04 / 04</span><span>Enrique Spacca</span></div>
+      <div class="content-top" style="max-width:900px;">
+        <div class="kicker reveal" data-d="1">Quotation</div>
+        <h1 class="h-outline reveal" data-d="2" style="font-size:88px;">The&nbsp;Quotation</h1>
+      </div>
+      <div class="q-summary reveal" data-d="3">
+        <span>Ref. DP-2026-07 · Draft v3</span>
+        <span>Prices in EUR (€)</span>
+        <span>Valid for 30 days from 26.07.2026</span>
+      </div>
+      <div class="q-cards">
+        <div class="q-card reveal" data-d="4">
+          <div class="opt">Option A</div>
+          <div class="name">Amas + Sail</div>
+          <div class="price">€1,200</div>
+          <div class="status">Sail pending print confirmation</div>
+          <hr class="rule">
+          <p>The full illustration across both amas and across the sail. This option opens as soon as Joshua confirms the sail can be printed, and from there it is a go.</p>
+          <div class="includes">Includes: Calls &amp; questions · Sketch directions · One refinement round · Final artwork files</div>
+        </div>
+        <div class="q-card reveal" data-d="5">
+          <div class="opt">Option B</div>
+          <div class="name">Amas Only</div>
+          <div class="price">€700</div>
+          <div class="status">Confirmed &amp; ready</div>
+          <hr class="rule">
+          <p>The full illustration across both amas, confirmed and ready to begin whenever you are.</p>
+          <div class="includes">Includes: Calls &amp; questions · Sketch directions · One refinement round · Final artwork files</div>
+        </div>
+      </div>
+      <div class="q-down reveal" data-d="6"><b>€300</b> downpayment to begin — either option, same start.</div>
+      <div class="q-foot reveal" data-d="6">
+        <div class="legal">All prices are in EUR (€) and exclude materials and any third-party costs (marine-grade paint, primer, or sail printing and production). Valid for 30 days from the date above.</div>
+        <div class="signoff">Prepared by Árbol {Enrique Spacca}<br>enriquespacca.com</div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Deck controls: progress + arrows, outside the slide design system -->
+<div class="deck-controls">
+  <button id="prevBtn" aria-label="Previous slide">‹</button>
+  <span class="count"><span id="curNum">1</span> / <span id="totNum">4</span></span>
+  <button id="nextBtn" aria-label="Next slide">›</button>
+</div>
+
+<!-- Edit-mode affordance -->
+<div class="edit-hotzone" id="editHotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Edit mode (E)">✏️</button>
+
+<script>
+/* ===========================================
+   SLIDE PRESENTATION CONTROLLER
+   Handles stage scaling and navigation (keyboard/touch/wheel/buttons).
+   =========================================== */
+class SlidePresentation {
+  constructor(){
+    this.slides = Array.from(document.querySelectorAll('.slide'));
+    this.current = 0;
+    this.stage = document.getElementById('deckStage');
+    this.setupStageScale();
+    this.setupKeyboardNav();
+    this.setupTouchNav();
+    this.setupWheelNav();
+    this.setupButtons();
+    document.getElementById('totNum').textContent = this.slides.length;
+    this.showSlide(0);
+  }
+  setupStageScale(){
+    const scale = () => {
+      const f = Math.min(window.innerWidth/1920, window.innerHeight/1080);
+      const x = (window.innerWidth - 1920*f)/2, y = (window.innerHeight - 1080*f)/2;
+      this.stage.style.transform = `translate(${x}px, ${y}px) scale(${f})`;
+    };
+    scale(); window.addEventListener('resize', scale);
+  }
+  setupKeyboardNav(){
+    document.addEventListener('keydown', (e) => {
+      if (e.target.getAttribute && e.target.getAttribute('contenteditable') === 'true') return;
+      if (['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)) { e.preventDefault(); this.next(); }
+      if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); this.prev(); }
+    });
+  }
+  setupTouchNav(){
+    let startX = null;
+    this.stage.addEventListener('touchstart', (e) => startX = e.touches[0].clientX, {passive:true});
+    this.stage.addEventListener('touchend', (e) => {
+      if (startX === null) return;
+      const dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) > 60) dx < 0 ? this.next() : this.prev();
+      startX = null;
+    }, {passive:true});
+  }
+  setupWheelNav(){
+    let locked = false;
+    window.addEventListener('wheel', (e) => {
+      if (locked) return;
+      if (Math.abs(e.deltaY) < 24) return;
+      locked = true;
+      e.deltaY > 0 ? this.next() : this.prev();
+      setTimeout(() => locked = false, 650);
+    }, {passive:true});
+  }
+  setupButtons(){
+    document.getElementById('nextBtn').addEventListener('click', () => this.next());
+    document.getElementById('prevBtn').addEventListener('click', () => this.prev());
+  }
+  next(){ this.showSlide(Math.min(this.current+1, this.slides.length-1)); }
+  prev(){ this.showSlide(Math.max(this.current-1, 0)); }
+  showSlide(i){
+    this.current = i;
+    this.slides.forEach((s, idx) => {
+      s.classList.toggle('active', idx === i);
+      s.classList.toggle('visible', idx === i);
+    });
+    document.getElementById('curNum').textContent = i+1;
+  }
+}
+const deck = new SlidePresentation();
+
+/* ===========================================
+   INLINE EDITING (default post-draft affordance)
+   Click any text to edit; Ctrl/Cmd+S saves to localStorage.
+   =========================================== */
+class InlineEditor {
+  constructor(){
+    this.isActive = false;
+    this.storageKey = 'dragons-pearl-quotation-v2-edits';
+    this.toggle = document.getElementById('editToggle');
+    this.hotzone = document.getElementById('editHotzone');
+    this.restoreEdits();
+    this.bindEvents();
+  }
+  bindEvents(){
+    let hideTimeout = null;
+    const show = () => { clearTimeout(hideTimeout); this.toggle.classList.add('show'); };
+    const scheduleHide = () => { hideTimeout = setTimeout(() => { if (!this.isActive) this.toggle.classList.remove('show'); }, 400); };
+    this.hotzone.addEventListener('mouseenter', show);
+    this.hotzone.addEventListener('mouseleave', scheduleHide);
+    this.toggle.addEventListener('mouseenter', show);
+    this.toggle.addEventListener('mouseleave', scheduleHide);
+    this.hotzone.addEventListener('click', () => this.toggleEditMode());
+    this.toggle.addEventListener('click', () => this.toggleEditMode());
+    document.addEventListener('keydown', (e) => {
+      if ((e.key === 'e' || e.key === 'E') && (!e.target.getAttribute || e.target.getAttribute('contenteditable') !== 'true')) {
+        this.toggleEditMode();
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') { e.preventDefault(); this.save(); }
+    });
+  }
+  editableEls(){
+    return document.querySelectorAll('.slide h1, .slide p, .slide .body-copy, .slide .name, .slide .price, .slide .status, .slide .sub, .slide .includes, .slide .legal, .slide .txt strong, .slide .txt span, .slide .tl-note');
+  }
+  toggleEditMode(){
+    this.isActive = !this.isActive;
+    this.toggle.classList.toggle('active', this.isActive);
+    this.editableEls().forEach(el => el.setAttribute('contenteditable', this.isActive ? 'true' : 'false'));
+    if (!this.isActive) this.save();
+  }
+  save(){
+    const data = {};
+    this.editableEls().forEach((el, i) => { data[i] = el.innerHTML; });
+    localStorage.setItem(this.storageKey, JSON.stringify(data));
+  }
+  restoreEdits(){
+    const raw = localStorage.getItem(this.storageKey);
+    if (!raw) return;
+    try {
+      const data = JSON.parse(raw);
+      this.editableEls().forEach((el, i) => { if (data[i] !== undefined) el.innerHTML = data[i]; });
+    } catch (e) { /* ignore corrupt storage */ }
+  }
+}
+new InlineEditor();
+</script>
+</body>
+</html>

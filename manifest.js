@@ -16,5 +16,14 @@ const PRESENTATIONS = [
     cover: "dragons-pearl-quotation/cover.jpg",
     url: "dragons-pearl-quotation/index.html",
     date: "2026-07-25"
+  },
+  {
+    id: "dragons-pearl-quotation-v2",
+    title: "Dragon's Pearl — Quotation (Draft v3, 4 slides)",
+    category: "price-quotations",
+    categoryLabel: "Price Quotations",
+    cover: "dragons-pearl-quotation-v2/cover.jpg",
+    url: "dragons-pearl-quotation-v2/index.html",
+    date: "2026-07-26"
   }
 ];
