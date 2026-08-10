@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Back of Cards · TP Explorers</title>
+
+<!-- Fonts: IBM Plex Sans (headlines/body) + IBM Plex Mono (labels, captions) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================
+   CSS CUSTOM PROPERTIES — Enrique Spacca Art brand system
+   Lifted from dragons-pearl-quotation-v2. Lilac field on every slide,
+   pure black ink softened to ~82% for body text.
+   =========================================== */
+:root {
+  --periwinkle:   #BBBCFF;   /* primary page field */
+  --lime:         #B5EB46;   /* headline / accent fill */
+  --ink:          #000000;   /* pure black — borders, rules, headline stroke */
+  --ink-text:     rgba(0,0,0,0.82); /* body/base text color on periwinkle fields */
+  --lilac-dark:   #a8a9fc;   /* darker lilac — accent bars */
+  --paper:        #F5F4FF;   /* light text on the floating deck-controls overlay */
+  --rule:         rgba(0,0,0,0.18);
+
+  --font-display: 'IBM Plex Sans', sans-serif;
+  --font-body:    'IBM Plex Sans', sans-serif;
+  --font-mono:    'IBM Plex Mono', monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-normal: 0.7s;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ===========================================
+   FIXED 16:9 STAGE — mandatory base
+   =========================================== */
+html, body { width:100%; height:100%; margin:0; overflow:hidden; background: var(--stage-bg,#000); }
+.deck-viewport { position:fixed; inset:0; overflow:hidden; background: var(--stage-bg,#000); }
+.deck-stage { position:absolute; left:0; top:0; width:1920px; height:1080px; overflow:hidden; transform-origin:0 0; background: var(--slide-bg,#fff); }
+.slide { position:absolute; inset:0; width:1920px; height:1080px; overflow:hidden; display:block; visibility:hidden; opacity:0; pointer-events:none; background: var(--slide-bg,#fff); }
+.slide.active, .slide.visible { visibility:visible; opacity:1; pointer-events:auto; z-index:1; }
+img, video, canvas, svg { max-width:100%; max-height:100%; }
+.deck-controls { position:fixed; left:50%; bottom:22px; transform:translateX(-50%); z-index:1000; }
+@media print {
+  html, body { width:1920px; height:auto; overflow:visible; background:#fff; }
+  .deck-viewport { position:static; overflow:visible; background:#fff; }
+  .deck-stage { position:static; width:auto; height:auto; transform:none !important; background:none; }
+  .slide { position:relative; display:block !important; visibility:visible !important; opacity:1 !important; pointer-events:auto !important; width:1920px; height:1080px; break-after:page; page-break-after:always; }
+  .slide:last-child { break-after:auto; page-break-after:auto; }
+  .deck-controls, .mode-hint { display:none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration:0.01ms !important; transition-duration:0.2s !important; }
+}
+
+/* ===========================================
+   BASE SLIDE FIELD
+   =========================================== */
+body { font-family: var(--font-body); }
+.slide.field-periwinkle { background: var(--periwinkle); color: var(--ink-text); }
+
+/* ===========================================
+   REVEAL ANIMATION
+   =========================================== */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity var(--duration-normal) var(--ease-out-expo),
+              transform var(--duration-normal) var(--ease-out-expo);
+}
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+.reveal[data-d="1"] { transition-delay: .08s; }
+.reveal[data-d="2"] { transition-delay: .18s; }
+.reveal[data-d="3"] { transition-delay: .28s; }
+.reveal[data-d="4"] { transition-delay: .38s; }
+.reveal[data-d="5"] { transition-delay: .48s; }
+.reveal[data-d="6"] { transition-delay: .58s; }
+
+/* ===========================================
+   TYPOGRAPHY UTILITIES
+   =========================================== */
+.mono { font-family: var(--font-mono); }
+
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lime);
+}
+
+.h-outline {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--lime);
+  -webkit-text-stroke: 2.5px var(--ink);
+  paint-order: stroke fill;
+  letter-spacing: -0.01em;
+  line-height: 0.98;
+}
+
+.body-copy {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1.52;
+  color: var(--ink-text);
+  max-width: 1060px;
+}
+
+.rule { height: 1px; background: var(--rule); border: none; }
+
+/* ===========================================
+   RUNNING HEADER + BRAND MARK
+   =========================================== */
+.hdr {
+  position: absolute; top: 64px; left: 96px; right: 96px; z-index: 3;
+  display: flex; align-items: baseline; justify-content: space-between;
+  font-family: var(--font-mono); font-size: 15px; font-weight: 500;
+  letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink); opacity: 0.62;
+  padding-bottom: 18px; border-bottom: 1px solid var(--rule);
+}
+.hdr span { white-space: nowrap; }
+.hdr span + span { margin-left: 32px; }
+
+.brand-mark {
+  position: absolute; bottom: 56px; right: 96px; z-index: 3;
+  font-family: var(--font-mono); font-weight: 700; font-size: 16px;
+  letter-spacing: 0.04em; color: var(--ink); opacity: 0.78;
+}
+
+.content-top { position: absolute; top: 168px; left: 96px; right: 96px; }
+
+/* ===========================================
+   SLIDE 1 — COVER
+   =========================================== */
+/* Cover background: Enrique drops the artwork in here. Point the
+   background-image at assets/<file> and the mask will imprint it onto the
+   lilac field the same way the Dragon's Pearl deck does. Left empty on
+   purpose so the deck ships with no broken request. */
+.s-cover .cover-motif {
+  position: absolute; inset: 0; background-size: cover; background-position: center;
+  /* background-image: url('assets/cover-background.jpg'); */
+  mix-blend-mode: multiply; opacity: 0.85;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 32%, black 68%, black 100%);
+  mask-image: linear-gradient(to right, transparent 0%, transparent 32%, black 68%, black 100%);
+}
+.s-cover .ref-chip {
+  position: absolute; top: 64px; left: 96px;
+  border: 1.5px solid var(--ink);
+  font-family: var(--font-mono); font-size: 16px; font-weight: 500;
+  letter-spacing: 0.06em; padding: 16px 22px; line-height: 1.6;
+  color: var(--ink-text);
+}
+.s-cover .cover-mid { position: absolute; left: 96px; right: 96px; top: 400px; }
+.s-cover h1 { font-size: 168px; }
+.s-cover .kicker { margin-bottom: 22px; }
+.s-cover .sub { font-size: 30px; max-width: 1150px; margin-top: 26px; }
+.s-cover .cover-foot {
+  position: absolute; left: 96px; right: 96px; bottom: 72px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.s-cover .cover-logo { height: 68px; width: auto; display: block; }
+.s-cover .foot-right {
+  font-family: var(--font-mono); font-size: 16px; letter-spacing: 0.04em;
+  color: var(--ink-text); text-align: right; line-height: 1.7;
+}
+.s-cover .foot-right a { color: var(--ink-text); text-decoration: none; border-bottom: 1px solid var(--rule); }
+
+/* ===========================================
+   NARRATIVE + CONCEPT TITLE SLIDES
+   =========================================== */
+.narr h1 { font-size: 104px; margin-top: 18px; margin-bottom: 34px; }
+.narr .rule { width: 120px; margin-bottom: 34px; }
+.narr .body-copy + .body-copy { margin-top: 26px; }
+
+.s-concept .content-top { max-width: 1180px; }
+.s-concept h1 { font-size: 118px; }
+.c-meta {
+  position: absolute; left: 96px; right: 96px; bottom: 128px;
+  display: flex; gap: 56px;
+  font-family: var(--font-mono); font-size: 17px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7;
+  padding-top: 22px; border-top: 1px solid var(--rule);
+}
+
+/* Concept index numeral, oversized and quiet, right of the title block */
+.c-numeral {
+  position: absolute; right: 96px; top: 268px;
+  font-family: var(--font-display); font-weight: 700; font-size: 380px;
+  line-height: 0.8; color: var(--lilac-dark);
+  -webkit-user-select: none; user-select: none;
+}
+
+/* ===========================================
+   PAIR SLIDES — two images side by side
+   Fixed 1920x1080 measurements. Images are contained, never cropped, and
+   the border hugs the artwork rather than a fixed box.
+   =========================================== */
+.pair-head {
+  position: absolute; top: 146px; left: 96px; right: 96px; z-index: 3;
+  display: flex; align-items: baseline; justify-content: space-between;
+}
+.pair-head .t {
+  font-family: var(--font-mono); font-size: 21px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-text);
+}
+.pair-head .r {
+  font-family: var(--font-mono); font-size: 16px; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-text); opacity: 0.6;
+}
+
+.pair {
+  position: absolute; top: 212px; left: 96px; right: 96px; bottom: 126px;
+  display: flex; gap: 72px;
+}
+.pair-cell { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.pair-frame {
+  flex: 1; min-height: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.pair-frame img {
+  max-width: 100%; max-height: 100%;
+  width: auto; height: auto;
+  object-fit: contain; display: block;
+  border: 1.5px solid var(--ink);
+}
+.pair-cap {
+  margin-top: 22px; text-align: center;
+  font-family: var(--font-mono); font-size: 16px; font-weight: 500;
+  letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink-text); opacity: 0.72;
+}
+
+/* ===========================================
+   MOCKUP SLIDES — one image, as large as the slide allows
+   Two treatments, switched by the `mockup-fill` class on <body>:
+     A · contained (default) — image sits inside the margins, bordered
+     B · fill — image bleeds to all four edges, chrome turns lilac
+   Press M to compare. Once chosen, hardcode the winner and drop the other.
+   =========================================== */
+.s-mockup .mockup-bleed {
+  position: absolute; top: 206px; left: 96px; right: 96px; bottom: 118px;
+  z-index: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: none;
+}
+.s-mockup .mockup-bleed img {
+  max-width: 100%; max-height: 100%;
+  width: auto; height: auto;
+  object-fit: contain; display: block;
+  border: 1.5px solid var(--ink);
+}
+.s-mockup .mockup-cap {
+  position: absolute; left: 96px; bottom: 56px; z-index: 3;
+  text-align: left;
+  font-family: var(--font-mono); font-size: 16px; font-weight: 500;
+  letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink-text); opacity: 0.72;
+}
+
+/* --- Treatment B: full-bleed --- */
+body.mockup-fill .s-mockup .mockup-bleed {
+  top: 0; left: 0; right: 0; bottom: 0;
+}
+body.mockup-fill .s-mockup .mockup-bleed img {
+  max-width: none; max-height: none;
+  width: 100%; height: 100%;
+  object-fit: cover; border: none;
+}
+body.mockup-fill .s-mockup .hdr {
+  color: var(--periwinkle); opacity: 0.96;
+  border-bottom-color: rgba(187,188,255,0.42);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+}
+body.mockup-fill .s-mockup .pair-head .t,
+body.mockup-fill .s-mockup .pair-head .r,
+body.mockup-fill .s-mockup .mockup-cap,
+body.mockup-fill .s-mockup .brand-mark {
+  color: var(--periwinkle); opacity: 0.96;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+}
+
+/* Mode hint, outside the slide design system */
+.mode-hint {
+  position: fixed; right: 20px; top: 18px; z-index: 1000;
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em;
+  color: var(--paper); opacity: 0.55;
+  background: rgba(0,0,0,0.72); padding: 8px 14px; border-radius: 999px;
+  -webkit-user-select: none; user-select: none;
+}
+
+/* ===========================================
+   FINAL SLIDE — all six concepts side by side
+   =========================================== */
+.s-grid .content-top { top: 146px; }
+.s-grid h1 { font-size: 84px; margin-top: 14px; margin-bottom: 0; }
+.grid-row {
+  position: absolute; top: 286px; left: 72px; right: 72px; bottom: 104px;
+  display: flex; gap: 26px;
+}
+.g-cell { flex: 1; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+/* Fixed frame height so every card stands on the same shelf and the six
+   captions share one baseline, whatever each artwork's aspect ratio is. */
+.g-frame {
+  flex: 0 0 auto; height: 392px;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.g-frame img {
+  max-width: 100%; max-height: 100%;
+  width: auto; height: auto;
+  object-fit: contain; display: block;
+  border: 1.5px solid var(--ink);
+}
+.g-cap {
+  margin-top: 18px; text-align: center;
+  font-family: var(--font-mono); color: var(--ink-text);
+}
+.g-cap b {
+  display: block; font-size: 17px; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 5px;
+}
+.g-cap span { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.6; }
+
+/* ===========================================
+   DECK CONTROLS
+   =========================================== */
+.deck-controls { display: flex; align-items: center; gap: 18px; background: rgba(0,0,0,0.72); backdrop-filter: blur(6px); padding: 10px 20px; border-radius: 999px; }
+.deck-controls button { background: none; border: none; color: var(--paper); font-size: 20px; cursor: pointer; line-height: 1; }
+.deck-controls .count { font-family: var(--font-mono); font-size: 14px; color: var(--paper); opacity: 0.7; min-width: 62px; text-align: center; }
+
+</style>
+</head>
+<body>
+<div class="deck-viewport">
+  <main class="deck-stage" id="deckStage">
+
+    <!-- ============================================================
+         SLIDE 1 — COVER
+         ============================================================ -->
+    <section class="slide field-periwinkle s-cover active">
+      <div class="cover-motif"></div>
+      <div class="ref-chip reveal" data-d="1">TP EXPLORERS · BACK OF CARDS<br>02.08.2026</div>
+      <div class="cover-mid">
+        <div class="kicker reveal" data-d="2">Six directions for the reverse face</div>
+        <h1 class="h-outline reveal" data-d="3">Back of Cards</h1>
+        <p class="sub body-copy reveal" data-d="4">Concepts for the back of the TP Explorers deck, carried from the first sketchbook pages through to the card resting in a hand.</p>
+      </div>
+      <div class="cover-foot reveal" data-d="5">
+        <img class="cover-logo" src="assets/ES-ART_Logo-label_small.svg" alt="Enrique Spacca Art logo">
+        <div class="foot-right">
+          <span>Enrique Spacca Art · Prepared by Árbol {Enrique Spacca}</span><br>
+          <a href="http://enriquespacca.com">enriquespacca.com</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 2 — OPENING
+         ============================================================ -->
+    <section class="slide field-periwinkle narr">
+      <div class="hdr"><span>Back of Cards</span><span>TP Explorers</span><span>02 / 22</span><span>Enrique Spacca</span></div>
+      <div class="content-top" style="max-width:1180px;">
+        <div class="kicker reveal" data-d="1">Opening</div>
+        <h1 class="h-outline reveal" data-d="2">Back of cards</h1>
+        <hr class="rule reveal" data-d="3">
+        <p class="body-copy reveal" data-d="4">Series of inspirations designed for the back of the new Frown Strong tarot cards.</p>
+        <p class="body-copy reveal" data-d="5">Six directions follow. Each one begins on paper, becomes vector, then tested in a realistic mockup.</p>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         CONCEPT 01 — STAR LATTICE  (slides 3, 4, 5, 6)
+         ============================================================ -->
+    <section class="slide field-periwinkle narr s-concept">
+      <div class="hdr"><span>Back of Cards</span><span>TP Explorers</span><span>03 / 22</span><span>Enrique Spacca</span></div>
+      <div class="c-numeral reveal" data-d="1">01</div>
+      <div class="content-top">
+        <div class="kicker reveal" data-d="1">Concept 01</div>
+        <h1 class="h-outline reveal" data-d="2">Star</h1>
+        <hr class="rule reveal" data-d="3">
+        <p class="body-copy reveal" data-d="4">A six-point lattice built from overlapping triangles. Each star holds a dot at every vertex, so the field reads as both a grid and a scatter.</p>
+      </div>
+      <div class="c-meta reveal" data-d="5">
+        <span>Origin: Sketchbook</span>
+        <span>Rendered: Session 1</span>
+        <span>Two colourways</span>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <section class="slide field-periwinkle">
+      <div class="hdr"><span>Back of Cards</span><span>TP Explorers</span><span>04 / 22</span><span>Enrique Spacca</span></div>
+      <div class="pair-head reveal" data-d="1"><div class="t">01 · Star</div><div class="r">Sketch and design</div></div>
+      <div class="pair">
+        <div class="pair-cell reveal" data-d="2">
+          <div class="pair-frame"><img src="assets/sketch-01-star-lattice.jpg" alt="Pencil sketch of a hexagram construction grid with a trefoil inside the hexagon"></div>
+          <div class="pair-cap">Sketch · hexagram construction</div>
+        </div>
+        <div class="pair-cell reveal" data-d="3">
+          <div class="pair-frame"><img src="assets/design-01-star-lattice.jpg" alt="Star card back, gold gradient with a black six-point lattice and cream dots"></div>
+          <div class="pair-cap">Design · gold on black</div>
+        </div>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <section class="slide field-periwinkle">
+      <div class="hdr"><span>Back of Cards</span><span>TP Explorers</span><span>05 / 22</span><span>Enrique Spacca</span></div>
+      <div class="pair-head reveal" data-d="1"><div class="t">01 · Star</div><div class="r">Colourways</div></div>
+      <div class="pair">
+        <div class="pair-cell reveal" data-d="2">
+          <div class="pair-frame"><img src="assets/design-01-star-lattice.jpg" alt="Star card back, gold gradient with a black six-point lattice and cream dots"></div>
+          <div class="pair-cap">Colourway · gold on black</div>
+        </div>
+        <div class="pair-cell reveal" data-d="3">
+          <div class="pair-frame"><img src="assets/design-01b-star-lattice-green.jpg" alt="Star card back in the second colourway, red stars with blue dots on a deep green ground"></div>
+          <div class="pair-cap">Colourway · red on green</div>
+        </div>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <section class="slide field-periwinkle s-mockup">
+      <div class="mockup-bleed reveal" data-d="2"><img src="assets/mockup-01-star-lattice.jpg" alt="Star cards stacked and laid on a dark wood table in raking light"></div>
+      <div class="hdr"><span>Back of Cards</span><span>TP Explorers</span><span>06 / 22</span><span>Enrique Spacca</span></div>
+      <div class="pair-head reveal" data-d="1"><div class="t">01 · Star</div><div class="r">In context</div></div>
+      <div class="mockup-cap reveal" data-d="3">Mockup · gold on black</div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         CONCEPT 02 — FIELD LINES  (slides 7, 8, 9)
+         ============================================================ -->
+    <section class="slide field-periwinkle narr s-concept">
+      <div class="hdr"><span>Back of Cards</span><span>TP Explorers</span><span>07 / 22</span><span>Enrique Spacca</span></div>
+      <div class="c-numeral reveal" data-d="1">02</div>
+      <div class="content-top">
+        <div class="kicker reveal" data-d="1">Concept 02</div>
+        <h1 class="h-outline reveal" data-d="2">Field Lines</h1>
+        <hr class="rule reveal" data-d="3">
+        <p class="body-copy reveal" data-d="4">Three nodes stacked on a vertical axis, the space between them filled with the curves a magnetic field draws between two poles. The card reads the same either way up.</p>
+      </div>
+      <div class="c-meta reveal" data-d="5">
+        <span>Origin: Sketchbook</span>
+        <span>Rendered: Session 1</span>
+        <span>Gold and cream, line only</span>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <section class="slide field-periwinkle">
+      <div class="hdr"><span>Back of Cards</span><span>TP Explorers</span><span>08 / 22</span><span>Enrique Spacca</span></div>
+      <div class="pair-head reveal" data-d="1"><div class="t">02 · Field Lines</div><div class="r">Sketch and design</div></div>
+      <div class="pair">
+        <div class="pair-cell reveal" data-d="2">
+          <div class="pair-frame"><img src="assets/sketch-02-field-lines.jpg" alt="Pencil sketch of three concentric nodes arranged on a vertical centre axis"></div>
+          <div class="pair-cap">Sketch · three nodes on an axis</div>
+        </div>
+        <div class="pair-cell reveal" data-d="3">
+          <div class="pair-frame"><img src="assets/design-02-field-lines.jpg" alt="Field Lines card back, gold and cream with three nested rings joined by field curves"></div>
+          <div class="pair-cap">Design · Session 1</div>
+        </div>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <section class="slide field-periwinkle s-mockup">
+      <div class="mockup-bleed reveal" data-d="2"><img src="assets/mockup-02-field-lines.jpg" alt="Field Lines cards spread across a dark wood table beside a smooth stone"></div>
+      <div class="hdr"><span>Back of Cards</span><span>TP Explorers</span><span>09 / 22</span><span>Enrique Spacca</span></div>
+      <div class="pair-head reveal" data-d="1"><div class="t">02 · Field Lines</div><div class="r">In context</div></div>
+      <div class="mockup-cap reveal" data-d="3">Mockup · in context</div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         CONCEPT 03 — BEAD FIELD  (slides 10, 11, 12)
+         No sketch exists for this one, so the pair slide shows two
+         colourways instead.
+         ============================================================ -->
+    <section class="slide field-periwinkle narr s-concept">
+      <div class="hdr"><span>Back of Cards</span><span>TP Explorers</span><span>10 / 22</span><span>Enrique Spacca</span></div>
+      <div class="c-numeral reveal" data-d="1">03</div>
+      <div class="content-top">
+        <div class="kicker reveal" data-d="1">Concept 03</div>
+        <h1 class="h-outline reveal" data-d="2">Bead Field</h1>
+        <hr class="rule reveal" data-d="3">
+        <p class="body-copy reveal" data-d="4">Circles packed until they touch, each one carrying a single point of colour. The gold outlines carry the whole structure, and the dark ground lets the colour sit quietly.</p>
+      </div>
+      <div class="c-meta reveal" data-d="5">
+        <span>Origin: Direct to screen</span>
+        <span>Rendered: Session 2</span>
+        <span>Two colourways</span>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <section class="slide field-periwinkle">
+      <div class="hdr"><span>Back of Cards</span><span>TP Explorers</span><span>11 / 22</span><span>Enrique Spacca</span></div>
+      <div class="pair-head reveal" data-d="1"><div class="t">03 · Bead Field</div><div class="r">Colourways</div></div>
+      <div class="pair">
+        <div class="pair-cell reveal" data-d="2">
+          <div class="pair-frame"><img src="assets/design-03b-bead-field-brown.jpg" alt="Bead Field card back in the brown colourway, white rings with grey and gold centres on a warm brown ground"></div>
+          <div class="pair-cap">Colourway · brown and gold</div>
+        </div>
+        <div class="pair-cell reveal" data-d="3">
+          <div class="pair-frame"><img src="assets/design-03-bead-field.jpg" alt="Bead Field card back, gold rings on a dark ground with green, blue and violet points"></div>
+          <div class="pair-cap">Colourway · gold on dark</div>
+        </div>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <section class="slide field-periwinkle s-mockup">
+      <div class="mockup-bleed reveal" data-d="2"><img src="assets/mockup-03-bead-field.jpg" alt="Bead Field deck stacked with two cards laid out on a dark wood table"></div>
+      <div class="hdr"><span>Back of Cards</span><span>TP Explorers</span><span>12 / 22</span><span>Enrique Spacca</span></div>
+      <div class="pair-head reveal" data-d="1"><div class="t">03 · Bead Field</div><div class="r">In context</div></div>
+      <div class="mockup-cap reveal" data-d="3">Mockup · gold on dark</div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         CONCEPT 04 — TREFOIL COINS  (slides 13, 14, 15)
+         ============================================================ -->
+    <section class="slide field-periwinkle narr s-concept">
+      <div class="hdr"><span>Back of Cards</span><span>TP Explorers</span><span>13 / 22</span><span>Enrique Spacca</span></div>
+      <div class="c-numeral reveal" data-d="1">04</div>
+      <div class="content-top">
+        <div class="kicker reveal" data-d="1">Concept 04</div>
+        <h1 class="h-outline reveal" data-d="2">Trefoil Coins</h1>
+        <hr class="rule reveal" data-d="3">
+        <p class="body-copy reveal" data-d="4">Gold discs on black, each holding three white circles in the tightest arrangement three circles can take. The discs overlap row to row, so the black ground turns into its own shape between them.</p>
+      </div>
+      <div class="c-meta reveal" data-d="5">
+        <span>Origin: Sketchbook</span>
+        <span>Rendered: Session 2</span>
+        <span>Gold on black, white trefoil</span>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <section class="slide field-periwinkle">
+      <div class="hdr"><span>Back of Cards</span><span>TP Explorers</span><span>14 / 22</span><span>Enrique Spacca</span></div>
+      <div class="pair-head reveal" data-d="1"><div class="t">04 · Trefoil Coins</div><div class="r">Sketch and design</div></div>
+      <div class="pair">
+        <div class="pair-cell reveal" data-d="2">
+          <div class="pair-frame"><img src="assets/sketch-03-bead-field.jpg" alt="Sketchbook page showing two inked trefoils set inside packed circles"></div>
+          <div class="pair-cap">Sketch · trefoil study</div>
+        </div>
+        <div class="pair-cell reveal" data-d="3">
+          <div class="pair-frame"><img src="assets/design-04-trefoil-coins.jpg" alt="Trefoil Coins card back, gold discs on black each holding three white circles"></div>
+          <div class="pair-cap">Design · Session 2</div>
+        </div>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <section class="slide field-periwinkle s-mockup">
+      <div class="mockup-bleed reveal" data-d="2"><img src="assets/mockup-04-trefoil-coins.jpg" alt="Trefoil Coins deck fanned open across a wood table with two cards face down"></div>
+      <div class="hdr"><span>Back of Cards</span><span>TP Explorers</span><span>15 / 22</span><span>Enrique Spacca</span></div>
+      <div class="pair-head reveal" data-d="1"><div class="t">04 · Trefoil Coins</div><div class="r">In context</div></div>
+      <div class="mockup-cap reveal" data-d="3">Mockup · in context</div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         CONCEPT 05 — VESICA KNOT  (slides 16, 17, 18)
+         ============================================================ -->
+    <section class="slide field-periwinkle narr s-concept">
+      <div class="hdr"><span>Back of Cards</span><span>TP Explorers</span><span>16 / 22</span><span>Enrique Spacca</span></div>
+      <div class="c-numeral reveal" data-d="1">05</div>
+      <div class="content-top">
+        <div class="kicker reveal" data-d="1">Concept 05</div>
+        <h1 class="h-outline reveal" data-d="2">Vesica Knot</h1>
+        <hr class="rule reveal" data-d="3">
+        <p class="body-copy reveal" data-d="4">Large circles crossing each other, drawn as ribbons that pass over and under. Only the line is white, so the gold reads as the field and the knot as the light on top of it.</p>
+      </div>
+      <div class="c-meta reveal" data-d="5">
+        <span>Origin: Sketchbook</span>
+        <span>Rendered: Session 2</span>
+        <span>Gold field, white interlace</span>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <section class="slide field-periwinkle">
+      <div class="hdr"><span>Back of Cards</span><span>TP Explorers</span><span>17 / 22</span><span>Enrique Spacca</span></div>
+      <div class="pair-head reveal" data-d="1"><div class="t">05 · Vesica Knot</div><div class="r">Sketch and design</div></div>
+      <div class="pair">
+        <div class="pair-cell reveal" data-d="2">
+          <div class="pair-frame"><img src="assets/sketch-05-vesica-knot.jpg" alt="Heavy marker sketch of interlocking circles filled solid black between the lines"></div>
+          <div class="pair-cap">Sketch · marker interlace</div>
+        </div>
+        <div class="pair-cell reveal" data-d="3">
+          <div class="pair-frame"><img src="assets/design-05-vesica-knot.jpg" alt="Vesica Knot card back, gold field with white interlaced circles passing over and under"></div>
+          <div class="pair-cap">Design · Session 2</div>
+        </div>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <section class="slide field-periwinkle s-mockup">
+      <div class="mockup-bleed reveal" data-d="2"><img src="assets/mockup-05-vesica-knot.jpg" alt="Vesica Knot deck stacked with cards laid face down on a wood table in sunlight"></div>
+      <div class="hdr"><span>Back of Cards</span><span>TP Explorers</span><span>18 / 22</span><span>Enrique Spacca</span></div>
+      <div class="pair-head reveal" data-d="1"><div class="t">05 · Vesica Knot</div><div class="r">In context</div></div>
+      <div class="mockup-cap reveal" data-d="3">Mockup · in context</div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         CONCEPT 06 — CURRENT  (slides 19, 20, 21)
+         ============================================================ -->
+    <section class="slide field-periwinkle narr s-concept">
+      <div class="hdr"><span>Back of Cards</span><span>TP Explorers</span><span>19 / 22</span><span>Enrique Spacca</span></div>
+      <div class="c-numeral reveal" data-d="1">06</div>
+      <div class="content-top">
+        <div class="kicker reveal" data-d="1">Concept 06</div>
+        <h1 class="h-outline reveal" data-d="2">Current</h1>
+        <hr class="rule reveal" data-d="3">
+        <p class="body-copy reveal" data-d="4">Flowing bands built entirely from stippled points, with one eye where the current turns back on itself. Density does the work that a line would normally do.</p>
+      </div>
+      <div class="c-meta reveal" data-d="5">
+        <span>Origin: Sketchbook</span>
+        <span>Rendered: Session 2</span>
+        <span>Gold gradient, stipple only</span>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <section class="slide field-periwinkle">
+      <div class="hdr"><span>Back of Cards</span><span>TP Explorers</span><span>20 / 22</span><span>Enrique Spacca</span></div>
+      <div class="pair-head reveal" data-d="1"><div class="t">06 · Current</div><div class="r">Sketch and design</div></div>
+      <div class="pair">
+        <div class="pair-cell reveal" data-d="2">
+          <div class="pair-frame"><img src="assets/sketch-06-current.jpg" alt="Charcoal sketch of flowing grain bands curling around a central eye"></div>
+          <div class="pair-cap">Sketch · charcoal grain study</div>
+        </div>
+        <div class="pair-cell reveal" data-d="3">
+          <div class="pair-frame"><img src="assets/design-06-current.jpg" alt="Current card back, gold gradient with stippled flowing bands and a central eye"></div>
+          <div class="pair-cap">Design · Session 2</div>
+        </div>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <section class="slide field-periwinkle s-mockup">
+      <div class="mockup-bleed reveal" data-d="2"><img src="assets/mockup-06-current.jpg" alt="Current deck fanned open on a wood table, gold stipple catching the light"></div>
+      <div class="hdr"><span>Back of Cards</span><span>TP Explorers</span><span>21 / 22</span><span>Enrique Spacca</span></div>
+      <div class="pair-head reveal" data-d="1"><div class="t">06 · Current</div><div class="r">In context</div></div>
+      <div class="mockup-cap reveal" data-d="3">Mockup · in context</div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 22 — ALL SIX TOGETHER
+         ============================================================ -->
+    <section class="slide field-periwinkle narr s-grid">
+      <div class="hdr"><span>Back of Cards</span><span>TP Explorers</span><span>22 / 22</span><span>Enrique Spacca</span></div>
+      <div class="content-top">
+        <div class="kicker reveal" data-d="1">All six</div>
+        <h1 class="h-outline reveal" data-d="2">The Set</h1>
+      </div>
+      <div class="grid-row">
+        <div class="g-cell reveal" data-d="2">
+          <div class="g-frame"><img src="assets/design-01-star-lattice.jpg" alt="Star card back"></div>
+          <div class="g-cap"><b>01 Star</b><span>Gold on black</span></div>
+        </div>
+        <div class="g-cell reveal" data-d="3">
+          <div class="g-frame"><img src="assets/design-02-field-lines.jpg" alt="Field Lines card back"></div>
+          <div class="g-cap"><b>02 Field Lines</b><span>Gold and cream</span></div>
+        </div>
+        <div class="g-cell reveal" data-d="3">
+          <div class="g-frame"><img src="assets/design-03-bead-field.jpg" alt="Bead Field card back"></div>
+          <div class="g-cap"><b>03 Bead Field</b><span>Gold on dark</span></div>
+        </div>
+        <div class="g-cell reveal" data-d="4">
+          <div class="g-frame"><img src="assets/design-04-trefoil-coins.jpg" alt="Trefoil Coins card back"></div>
+          <div class="g-cap"><b>04 Trefoil Coins</b><span>Gold on black</span></div>
+        </div>
+        <div class="g-cell reveal" data-d="4">
+          <div class="g-frame"><img src="assets/design-05-vesica-knot.jpg" alt="Vesica Knot card back"></div>
+          <div class="g-cap"><b>05 Vesica Knot</b><span>White interlace</span></div>
+        </div>
+        <div class="g-cell reveal" data-d="5">
+          <div class="g-frame"><img src="assets/design-06-current.jpg" alt="Current card back"></div>
+          <div class="g-cap"><b>06 Current</b><span>Gold stipple</span></div>
+        </div>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Deck controls: progress + arrows, outside the slide design system -->
+<div class="deck-controls">
+  <button id="prevBtn" aria-label="Previous slide">‹</button>
+  <span class="count"><span id="curNum">1</span> / <span id="totNum">22</span></span>
+  <button id="nextBtn" aria-label="Next slide">›</button>
+</div>
+
+<!-- Temporary: mockup treatment comparison. Remove once the treatment is chosen. -->
+<div class="mode-hint" id="modeHint">MOCKUP: CONTAINED · PRESS M</div>
+
+<script>
+/* ===========================================
+   SLIDE PRESENTATION CONTROLLER
+   Handles stage scaling and navigation (keyboard/touch/wheel/buttons).
+   =========================================== */
+class SlidePresentation {
+  constructor(){
+    this.slides = Array.from(document.querySelectorAll('.slide'));
+    this.current = 0;
+    this.stage = document.getElementById('deckStage');
+    this.setupStageScale();
+    this.setupKeyboardNav();
+    this.setupTouchNav();
+    this.setupWheelNav();
+    this.setupButtons();
+    document.getElementById('totNum').textContent = this.slides.length;
+    this.showSlide(0);
+  }
+  setupStageScale(){
+    const scale = () => {
+      const f = Math.min(window.innerWidth/1920, window.innerHeight/1080);
+      const x = (window.innerWidth - 1920*f)/2, y = (window.innerHeight - 1080*f)/2;
+      this.stage.style.transform = `translate(${x}px, ${y}px) scale(${f})`;
+    };
+    scale(); window.addEventListener('resize', scale);
+  }
+  setupKeyboardNav(){
+    document.addEventListener('keydown', (e) => {
+      if (['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)) { e.preventDefault(); this.next(); }
+      if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); this.prev(); }
+    });
+  }
+  setupTouchNav(){
+    let startX = null;
+    this.stage.addEventListener('touchstart', (e) => startX = e.touches[0].clientX, {passive:true});
+    this.stage.addEventListener('touchend', (e) => {
+      if (startX === null) return;
+      const dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) > 60) dx < 0 ? this.next() : this.prev();
+      startX = null;
+    }, {passive:true});
+  }
+  setupWheelNav(){
+    let locked = false;
+    window.addEventListener('wheel', (e) => {
+      if (locked) return;
+      if (Math.abs(e.deltaY) < 24) return;
+      locked = true;
+      e.deltaY > 0 ? this.next() : this.prev();
+      setTimeout(() => locked = false, 650);
+    }, {passive:true});
+  }
+  setupButtons(){
+    document.getElementById('nextBtn').addEventListener('click', () => this.next());
+    document.getElementById('prevBtn').addEventListener('click', () => this.prev());
+  }
+  next(){ this.showSlide(Math.min(this.current+1, this.slides.length-1)); }
+  prev(){ this.showSlide(Math.max(this.current-1, 0)); }
+  showSlide(i){
+    this.current = i;
+    this.slides.forEach((s, idx) => {
+      s.classList.toggle('active', idx === i);
+      s.classList.toggle('visible', idx === i);
+    });
+    document.getElementById('curNum').textContent = i+1;
+  }
+}
+new SlidePresentation();
+
+/* ===========================================
+   MOCKUP TREATMENT TOGGLE (temporary)
+   Press M to switch every mockup slide between the two proposals.
+   Delete this block, the .mode-hint element and the body.mockup-fill
+   rules once the treatment is chosen.
+   =========================================== */
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'm' && e.key !== 'M') return;
+  const fill = document.body.classList.toggle('mockup-fill');
+  document.getElementById('modeHint').textContent =
+    (fill ? 'MOCKUP: FULL BLEED' : 'MOCKUP: CONTAINED') + ' · PRESS M';
+});
+</script>
+</body>
+</html>

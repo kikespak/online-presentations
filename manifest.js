@@ -25,5 +25,14 @@ const PRESENTATIONS = [
     cover: "dragons-pearl-quotation-v2/cover.jpg",
     url: "dragons-pearl-quotation-v2/index.html",
     date: "2026-07-26"
+  },
+  {
+    id: "tarot-back-of-cards",
+    title: "Back of Cards — TP Explorers",
+    category: "presentations",
+    categoryLabel: "Presentations",
+    cover: "tarot-back-of-cards/cover.jpg",
+    url: "tarot-back-of-cards/index.html",
+    date: "2026-08-02"
   }
 ];
