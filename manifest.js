@@ -9,6 +9,15 @@ const PRESENTATIONS = [
     date: "2026-07-23"
   },
   {
+    id: "6e-festival-vin-nature-suisse-session-02",
+    title: "6e Festival Vin Nature Suisse — Session 02 (client)",
+    category: "briefings",
+    categoryLabel: "Briefings",
+    cover: "6e-festival-vin-nature-suisse-session-02/cover.jpg",
+    url: "6e-festival-vin-nature-suisse-session-02/index.html",
+    date: "2026-08-12"
+  },
+  {
     id: "dragons-pearl-quotation",
     title: "Dragon's Pearl — Quotation",
     category: "price-quotations",
