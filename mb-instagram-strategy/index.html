@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mark Ballabon — Instagram, a plan for the next three months</title>
+
+<!-- Fonts: IBM Plex Sans (headlines/body) + IBM Plex Mono (labels, refs, figures) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================
+   CSS CUSTOM PROPERTIES — Enrique Spacca Art brand system
+   Same token set as the Dragon's Pearl quotation: periwinkle field,
+   lime accent, pure black rules and strokes. No navy anywhere.
+   =========================================== */
+:root {
+  --periwinkle:   #BBBCFF;   /* primary page field */
+  --lime:         #B5EB46;   /* headline / figure / accent fill */
+  --ink:          #000000;   /* borders, rules, headline stroke */
+  --ink-text:     rgba(0,0,0,0.82); /* body text on periwinkle */
+  --ink-soft:     rgba(0,0,0,0.58); /* secondary text */
+  --lilac-dark:   #a8a9fc;   /* accent strips */
+  --paper:        #F5F4FF;   /* deck-controls overlay text only */
+  --rule:         rgba(0,0,0,0.18);
+
+  --font-display: 'IBM Plex Sans', sans-serif;
+  --font-body:    'IBM Plex Sans', sans-serif;
+  --font-mono:    'IBM Plex Mono', monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-normal: 0.7s;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ===========================================
+   FIXED 16:9 STAGE — mandatory base
+   =========================================== */
+html, body { width:100%; height:100%; margin:0; overflow:hidden; background: var(--stage-bg,#000); }
+.deck-viewport { position:fixed; inset:0; overflow:hidden; background: var(--stage-bg,#000); }
+.deck-stage { position:absolute; left:0; top:0; width:1920px; height:1080px; overflow:hidden; transform-origin:0 0; background: var(--slide-bg,#fff); }
+.slide { position:absolute; inset:0; width:1920px; height:1080px; overflow:hidden; display:block; visibility:hidden; opacity:0; pointer-events:none; background: var(--slide-bg,#fff); }
+.slide.active, .slide.visible { visibility:visible; opacity:1; pointer-events:auto; z-index:1; }
+img, video, canvas, svg { max-width:100%; max-height:100%; }
+.deck-controls { position:fixed; left:50%; bottom:22px; transform:translateX(-50%); z-index:1000; }
+@media print {
+  html, body { width:1920px; height:auto; overflow:visible; background:#fff; }
+  .deck-viewport { position:static; overflow:visible; background:#fff; }
+  .deck-stage { position:static; width:auto; height:auto; transform:none !important; background:none; }
+  .slide { position:relative; display:block !important; visibility:visible !important; opacity:1 !important; pointer-events:auto !important; width:1920px; height:1080px; break-after:page; page-break-after:always; }
+  .slide:last-child { break-after:auto; page-break-after:auto; }
+  .deck-controls { display:none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration:0.01ms !important; transition-duration:0.2s !important; }
+}
+
+/* ===========================================
+   BASE SLIDE FIELD — every slide stays on the lilac field
+   =========================================== */
+body { font-family: var(--font-body); }
+.slide.field-periwinkle { background: var(--periwinkle); color: var(--ink-text); }
+
+/* ===========================================
+   REVEAL ANIMATION
+   =========================================== */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity var(--duration-normal) var(--ease-out-expo),
+              transform var(--duration-normal) var(--ease-out-expo);
+}
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+.reveal[data-d="1"] { transition-delay: .08s; }
+.reveal[data-d="2"] { transition-delay: .18s; }
+.reveal[data-d="3"] { transition-delay: .28s; }
+.reveal[data-d="4"] { transition-delay: .38s; }
+.reveal[data-d="5"] { transition-delay: .48s; }
+.reveal[data-d="6"] { transition-delay: .58s; }
+.reveal[data-d="7"] { transition-delay: .68s; }
+
+/* ===========================================
+   TYPOGRAPHY UTILITIES
+   =========================================== */
+.mono { font-family: var(--font-mono); }
+
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 20px; font-weight: 600;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--lime);
+}
+
+/* Lime fill + black stroke — the deck's signature headline treatment */
+.h-outline {
+  font-family: var(--font-display); font-weight: 700;
+  color: var(--lime);
+  -webkit-text-stroke: 2.5px var(--ink);
+  paint-order: stroke fill;
+  letter-spacing: -0.01em; line-height: 0.98;
+}
+
+.body-copy {
+  font-family: var(--font-body); font-weight: 400;
+  font-size: 30px; line-height: 1.5;
+  color: var(--ink-text); max-width: 1060px;
+}
+.body-copy + .body-copy { margin-top: 22px; }
+
+.rule { height: 1px; background: var(--rule); border: none; }
+
+/* ===========================================
+   RUNNING HEADER + BRAND MARK
+   =========================================== */
+.hdr {
+  position: absolute; top: 64px; left: 96px; right: 96px;
+  display: flex; align-items: baseline; justify-content: space-between;
+  font-family: var(--font-mono); font-size: 15px; font-weight: 500;
+  letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink); opacity: 0.62;
+  padding-bottom: 18px; border-bottom: 1px solid var(--rule);
+}
+.hdr span { white-space: nowrap; }
+.hdr span + span { margin-left: 32px; }
+
+.brand-mark {
+  position: absolute; bottom: 56px; right: 96px;
+  font-family: var(--font-mono); font-weight: 700; font-size: 16px;
+  letter-spacing: 0.04em; color: var(--ink); opacity: 0.78;
+}
+
+/* ===========================================
+   CONTENT SLIDE SHELL
+   =========================================== */
+.content-top { position: absolute; top: 168px; left: 96px; right: 96px; }
+.narr h1 { font-size: 96px; margin-top: 18px; margin-bottom: 30px; }
+.narr .rule { width: 120px; margin-bottom: 32px; }
+
+/* ===========================================
+   SLIDE 1 — COVER
+   =========================================== */
+.s-cover .ref-chip {
+  position: absolute; top: 64px; left: 96px;
+  border: 1.5px solid var(--ink);
+  font-family: var(--font-mono); font-size: 16px; font-weight: 500;
+  letter-spacing: 0.06em; padding: 16px 22px; line-height: 1.6;
+  color: var(--ink-text);
+}
+.s-cover .cover-mid { position: absolute; left: 96px; right: 96px; top: 372px; }
+.s-cover h1 { font-size: 118px; }
+.s-cover .kicker { margin-bottom: 24px; }
+.s-cover .sub { font-size: 30px; max-width: 1180px; margin-top: 32px; }
+.s-cover .cover-foot {
+  position: absolute; left: 96px; right: 96px; bottom: 72px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.s-cover .cover-logo { height: 68px; width: auto; display: block; }
+.s-cover .foot-right {
+  font-family: var(--font-mono); font-size: 16px; letter-spacing: 0.04em;
+  color: var(--ink-text); text-align: right; line-height: 1.7;
+}
+.s-cover .foot-right a { color: var(--ink-text); text-decoration: none; border-bottom: 1px solid var(--rule); }
+
+/* ===========================================
+   SHARED COMPONENTS
+   =========================================== */
+/* Bordered card, the deck's default container */
+.card { border: 1.5px solid var(--ink); padding: 32px 34px 28px; display: flex; flex-direction: column; }
+.card .num {
+  font-family: var(--font-mono); font-size: 18px; font-weight: 700;
+  letter-spacing: 0.1em; color: var(--ink); opacity: 0.5; margin-bottom: 12px;
+}
+.card .name {
+  font-family: var(--font-display); font-weight: 700; font-size: 38px;
+  line-height: 1.08; margin-bottom: 14px; color: var(--ink-text);
+}
+.card p { font-family: var(--font-body); font-size: 21px; line-height: 1.44; color: var(--ink-text); }
+
+/* Three-up card row */
+.cards-3 { position: absolute; left: 96px; right: 96px; display: flex; gap: 44px; }
+.cards-3 .card { flex: 1; }
+/* .tight: for three-up rows carrying longer explanatory copy */
+.cards-3.tight .card { padding: 28px 30px 24px; }
+.cards-3.tight .card .name { font-size: 34px; margin-bottom: 12px; }
+.cards-3.tight .card p { font-size: 19px; line-height: 1.42; }
+
+/* Two-up card row */
+.cards-2 { position: absolute; left: 96px; right: 96px; display: flex; gap: 56px; }
+.cards-2 .card { flex: 1; }
+
+/* Table rows, used for the format grid and the pricing sheets */
+.rows { border-top: 1px solid var(--rule); }
+.rows .row { display: flex; gap: 34px; padding: 19px 0; border-bottom: 1px solid var(--rule); align-items: baseline; }
+.rows .row .c1 {
+  font-family: var(--font-mono); font-weight: 700; font-size: 18px;
+  letter-spacing: 0.06em; text-transform: uppercase; width: 290px; flex-shrink: 0; color: var(--ink);
+}
+.rows .row .c2 { font-family: var(--font-body); font-size: 20px; line-height: 1.36; flex: 1.35; color: var(--ink-text); }
+.rows .row .c3 { font-family: var(--font-body); font-size: 19px; line-height: 1.36; flex: 1; color: var(--ink-text); opacity: 0.88; }
+
+/* Price sheet */
+.sheet { flex: 1; }
+.sheet h3 {
+  font-family: var(--font-mono); font-size: 19px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink);
+  margin-bottom: 6px;
+}
+.sheet .sub-note { font-family: var(--font-body); font-size: 18px; line-height: 1.4; color: var(--ink-soft); margin-bottom: 20px; }
+.sheet .prow { display: flex; gap: 26px; align-items: baseline; padding: 17px 0; border-bottom: 1px solid var(--rule); }
+.sheet .prow:first-of-type { border-top: 1px solid var(--rule); }
+.sheet .prow .lbl { flex: 1; font-family: var(--font-body); font-size: 20px; line-height: 1.35; color: var(--ink-text); }
+/* Figures sit in plain black at a lighter weight, so the sheet reads as a
+   price list rather than as a headline. The lime stroke stays on titles only. */
+.sheet .prow .amt {
+  font-family: var(--font-display); font-weight: 500; font-size: 32px; line-height: 1.1;
+  color: var(--ink-text);
+  white-space: nowrap; text-align: right;
+}
+.sheet .prow .amt small { font-size: 20px; font-weight: 400; }
+/* Cadence marker under each figure: monthly lines and one-off lines are not
+   the same commitment, and the sheet has to say which is which. */
+.sheet .prow .amt .cad {
+  display: block; font-family: var(--font-mono); font-size: 13px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); opacity: 0.5; margin-top: 5px;
+}
+/* Where a row has no figure, a mono note stands in for the amount */
+.sheet .prow .amt-note {
+  font-family: var(--font-mono); font-size: 16px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.5;
+  color: var(--ink); opacity: 0.6; text-align: right; white-space: nowrap;
+}
+
+/* Full-width accent strip */
+.strip {
+  position: absolute; left: 96px; right: 96px; min-height: 76px;
+  background: var(--lilac-dark); color: var(--ink-text);
+  display: flex; align-items: center; padding: 18px 36px;
+  font-family: var(--font-mono); font-weight: 600; font-size: 20px;
+  letter-spacing: 0.04em; line-height: 1.45;
+}
+.strip b { color: var(--lime); -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; margin-right: 10px; font-size: 23px; }
+
+/* Metric chips */
+.chips { position: absolute; left: 96px; right: 96px; display: flex; flex-wrap: wrap; gap: 16px; }
+.chip {
+  border: 1.5px solid var(--ink); padding: 15px 22px;
+  font-family: var(--font-mono); font-size: 18px; font-weight: 500;
+  letter-spacing: 0.04em; color: var(--ink-text);
+}
+
+/* Bulleted asks */
+.asks { position: absolute; left: 96px; width: 980px; }
+.asks .ask { display: flex; gap: 24px; padding: 17px 0; border-bottom: 1px solid var(--rule); align-items: baseline; }
+.asks .ask:first-child { border-top: 1px solid var(--rule); }
+.asks .ask .n { font-family: var(--font-mono); font-weight: 700; font-size: 18px; letter-spacing: 0.06em; opacity: 0.5; width: 40px; flex-shrink: 0; }
+.asks .ask .t { font-family: var(--font-body); font-size: 21px; line-height: 1.4; color: var(--ink-text); }
+
+/* Aside card, for material sitting outside the offer */
+.aside-card {
+  position: absolute; border: 1.5px dashed var(--ink); padding: 30px 34px;
+}
+.aside-card .tag {
+  font-family: var(--font-mono); font-size: 16px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink); opacity: 0.6; margin-bottom: 14px;
+}
+.aside-card p { font-family: var(--font-body); font-size: 20px; line-height: 1.45; color: var(--ink-text); }
+.aside-card p + p { margin-top: 14px; }
+
+/* Foot note line */
+.foot-note {
+  position: absolute; left: 96px; right: 96px;
+  font-family: var(--font-mono); font-size: 17px; font-weight: 600;
+  letter-spacing: 0.02em; text-transform: uppercase; line-height: 1.5;
+  opacity: 0.75; max-width: 1500px;
+}
+
+/* Pull statement, for the closing slide */
+.statement {
+  font-family: var(--font-display); font-weight: 700; font-size: 62px; line-height: 1.14;
+  color: var(--ink-text); max-width: 1400px;
+}
+
+/* ===========================================
+   DECK CONTROLS + EDIT AFFORDANCE
+   =========================================== */
+.deck-controls { display: flex; align-items: center; gap: 18px; background: rgba(0,0,0,0.72); backdrop-filter: blur(6px); padding: 10px 20px; border-radius: 999px; }
+.deck-controls button { background: none; border: none; color: var(--paper); font-size: 20px; cursor: pointer; line-height: 1; }
+.deck-controls .count { font-family: var(--font-mono); font-size: 14px; color: var(--paper); opacity: 0.7; min-width: 56px; text-align: center; }
+.edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+.edit-toggle { position: fixed; top: 14px; left: 14px; z-index: 10001; width: 40px; height: 40px; border-radius: 50%; border: none; background: rgba(0,0,0,0.72); font-size: 17px; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+.edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+[contenteditable="true"] { outline: 1.5px dashed var(--lime); outline-offset: 4px; }
+</style>
+</head>
+<body>
+<div class="deck-viewport">
+  <main class="deck-stage" id="deckStage">
+
+    <!-- ============================================================
+         SLIDE 1 — COVER
+         ============================================================ -->
+    <section class="slide field-periwinkle s-cover active">
+      <div class="ref-chip reveal" data-d="1">REF. MB-2026-08 · PROPOSAL<br>17.08.2026</div>
+      <div class="cover-mid">
+        <div class="kicker reveal" data-d="2">Prepared for Mark Ballabon · Eminent Productions</div>
+        <h1 class="h-outline reveal" data-d="3">Instagram, a plan<br>for the next three months</h1>
+        <p class="sub body-copy reveal" data-d="4">Brand design applied to Instagram: a recognisable visual signature, built from material you already own.</p>
+      </div>
+      <div class="cover-foot reveal" data-d="5">
+        <img class="cover-logo" src="assets/ES-ART_Logo-label_small.svg" alt="Enrique Spacca Art logo">
+        <div class="foot-right">
+          <span>Enrique Spacca Art · Prepared by Árbol {Enrique Spacca}</span><br>
+          <a href="http://enriquespacca.com">enriquespacca.com</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 2 — WHERE WE ARE
+         ============================================================ -->
+    <section class="slide field-periwinkle narr">
+      <div class="hdr"><span>Instagram, a plan</span><span>Mark Ballabon · Eminent Productions</span><span>02 / 09</span><span>Enrique Spacca</span></div>
+      <div class="content-top">
+        <div class="kicker reveal" data-d="1">Context</div>
+        <h1 class="h-outline reveal" data-d="2">Where&nbsp;we&nbsp;are</h1>
+        <hr class="rule reveal" data-d="3">
+        <p class="body-copy reveal" data-d="4">Until now the account has been fed post by post, each one decided separately. That produces good individual pieces but no momentum.</p>
+        <p class="body-copy reveal" data-d="5">What I have proposed is brand design applied to Instagram: a recognisable visual signature, built from material you already own. Your own words, in your own hand, on a considered image, arriving on a rhythm.</p>
+        <p class="body-copy reveal" data-d="6">It comes from you rather than from a template, and it puts your writing in front of people rather than talking about your writing.</p>
+      </div>
+      <div class="strip reveal" data-d="7" style="top:830px;">The plan below covers three months: what gets published, what gets advertised, what it costs, and what we look at to know it is working.</div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 3 — WHAT WE ARE AIMING AT
+         ============================================================ -->
+    <section class="slide field-periwinkle narr">
+      <div class="hdr"><span>Instagram, a plan</span><span>Objectives</span><span>03 / 09</span><span>Enrique Spacca</span></div>
+      <div class="content-top" style="max-width:1400px;">
+        <div class="kicker reveal" data-d="1">Objectives</div>
+        <h1 class="h-outline reveal" data-d="2" style="font-size:88px;">What&nbsp;we&nbsp;are&nbsp;aiming&nbsp;at</h1>
+        <p class="body-copy reveal" data-d="3" style="font-size:26px;max-width:1400px;">It is worth saying plainly what the advertising is aiming at, so that the effort goes behind an agreed goal rather than a vague one.</p>
+      </div>
+      <div class="cards-3 reveal" data-d="4" style="top:492px;height:376px;">
+        <div class="card">
+          <div class="num">01</div>
+          <div class="name">To build an audience that recognises you</div>
+          <p>People who see a post and know it is yours before they read the name.</p>
+        </div>
+        <div class="card">
+          <div class="num">02</div>
+          <div class="name">To turn that audience into readers</div>
+          <p><em>Home, My Life in the Universe</em> is the doorway into the trilogy, so a reader gained now is worth considerably more than a single book.</p>
+        </div>
+        <div class="card">
+          <div class="num">03</div>
+          <div class="name">To fill the room when there is something to come to</div>
+          <p>Events, announced to the right people in the right place at the right time.</p>
+        </div>
+      </div>
+      <div class="foot-note reveal" data-d="6" style="bottom:96px;">They build on each other in that order, and going straight to the third rarely works.</div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 4 — THE RHYTHM
+         ============================================================ -->
+    <section class="slide field-periwinkle narr">
+      <div class="hdr"><span>Instagram, a plan</span><span>Content</span><span>04 / 09</span><span>Enrique Spacca</span></div>
+      <div class="content-top" style="max-width:1500px;">
+        <div class="kicker reveal" data-d="1">Content</div>
+        <h1 class="h-outline reveal" data-d="2" style="font-size:88px;margin-bottom:22px;">The&nbsp;rhythm</h1>
+        <p class="body-copy reveal" data-d="3" style="font-size:25px;max-width:1500px;">One to two posts a week, made in a monthly batch and scheduled in advance. Everything for the month is prepared, you approve it in one sitting, and then it runs without either of us thinking about it again. The format varies inside that rhythm, so the Instagram account stays alive.</p>
+      </div>
+      <div class="rows reveal" data-d="4" style="position:absolute;left:96px;right:96px;top:470px;">
+        <div class="row"><div class="c1">The quote card</div><div class="c2">Your handwriting on a chosen image.</div><div class="c3">The recognisable core. This is the signature.</div></div>
+        <div class="row"><div class="c1">The quote in motion</div><div class="c2">The same quote as a short clip of six to ten seconds: the ink appearing, a slow move across the paper, or the written note held in the foreground.</div><div class="c3">Instagram shows short video to far more people than it shows still images, and it costs no extra to make.</div></div>
+        <div class="row"><div class="c1">The hand at work</div><div class="c2">Close-up of the line being written.</div><div class="c3">Intimate, and no need to be on camera.</div></div>
+        <div class="row"><div class="c1">Your voice</div><div class="c2">You reading one line aloud, occasionally.</div><div class="c3">Hearing a writer read their own line is what turns a stranger into a reader.</div></div>
+        <div class="row"><div class="c1">Stories</div><div class="c2">Resharing each post, a question, a countdown before an event.</div><div class="c3">Free, quick, and where the people who already follow you actually look.</div></div>
+      </div>
+      <div class="foot-note reveal" data-d="6" style="bottom:78px;">The number of posts stays at one to two a week. The variety happens inside that number.</div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 5 — ADVERTISING, IN THREE STEPS
+         ============================================================ -->
+    <section class="slide field-periwinkle narr">
+      <div class="hdr"><span>Instagram, a plan</span><span>Advertising</span><span>05 / 09</span><span>Enrique Spacca</span></div>
+      <div class="content-top" style="max-width:1560px;">
+        <div class="kicker reveal" data-d="1">Advertising</div>
+        <h1 class="h-outline reveal" data-d="2" style="font-size:88px;margin-bottom:22px;">Advertising,&nbsp;in&nbsp;three&nbsp;steps</h1>
+        <p class="body-copy reveal" data-d="3" style="font-size:25px;max-width:1560px;">The role of advertising here is to act as a booster rather than a switch. It takes work that has already proved itself and puts it in front of more of the right people. It is closer to a scientific process than to a purchase, and it needs its own timing: look at what happens, form a theory, run a small experiment, refine the theory, then run a better one.</p>
+      </div>
+      <div class="cards-3 tight reveal" data-d="4" style="top:508px;height:428px;">
+        <div class="card">
+          <div class="num">STEP 01 · WEEKS 1–2</div>
+          <div class="name">Setting up</div>
+          <p>There is no advertising account yet, so one is created in your name, with your card on it. I also add a small piece of code to both websites, which simply tells us which visits and which sales came from Instagram. No advertising money is spent in this step.</p>
+        </div>
+        <div class="card">
+          <div class="num">STEP 02 · WEEKS 2–8</div>
+          <div class="name">Building the audience</div>
+          <p>The quote posts run. Some do noticeably better than others, and we know which rather than guessing. Those are the ones we put money behind, aimed at bringing people to your profile. Using posts that have already proved themselves is the single biggest difference between advertising that works and advertising that does not.</p>
+        </div>
+        <div class="card">
+          <div class="num">STEP 03 · FROM WEEK 6</div>
+          <div class="name">Books and events</div>
+          <p>Now selling makes sense, because we are speaking to people who have already met your words. This step also draws on something built quietly in step two: a record of everyone who watched, reacted or visited the site, who can be reached again for a fraction of the cost.</p>
+        </div>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 6 — BOOKS AND EVENTS
+         ============================================================ -->
+    <section class="slide field-periwinkle narr">
+      <div class="hdr"><span>Instagram, a plan</span><span>Step 03</span><span>06 / 09</span><span>Enrique Spacca</span></div>
+      <div class="content-top" style="max-width:1400px;">
+        <div class="kicker reveal" data-d="1">Step 03 · From week 6</div>
+        <h1 class="h-outline reveal" data-d="2" style="font-size:88px;">Books&nbsp;and&nbsp;events</h1>
+      </div>
+      <div class="cards-2 reveal" data-d="3" style="top:452px;height:430px;">
+        <div class="card">
+          <div class="num">01</div>
+          <div class="name">The books</div>
+          <p>Pointing at the shop on <strong>eminentproductions.uk.co</strong>, where each sale is visible to us.</p>
+          <p style="margin-top:16px;"><em>Home, My Life in the Universe</em> is presented as the opening of the trilogy rather than as a single title. A reader who finishes book one is a candidate for books two and three, which is what makes finding new readers worth paying for.</p>
+        </div>
+        <div class="card">
+          <div class="num">02</div>
+          <div class="name">Events</div>
+          <p>Aimed tightly at the area around the venue, starting three weeks before and pushing hardest in the final five days.</p>
+        </div>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 7 — WHAT IT COSTS
+         ============================================================ -->
+    <section class="slide field-periwinkle narr">
+      <div class="hdr"><span>Instagram, a plan</span><span>Investment</span><span>07 / 09</span><span>Enrique Spacca</span></div>
+      <div class="content-top" style="max-width:1400px;">
+        <div class="kicker reveal" data-d="1">Investment</div>
+        <h1 class="h-outline reveal" data-d="2" style="font-size:88px;margin-bottom:18px;">What&nbsp;it&nbsp;costs</h1>
+        <p class="body-copy reveal" data-d="3" style="font-size:24px;">Two separate things, and it is worth being clear about which is which.</p>
+      </div>
+      <div class="cards-2 reveal" data-d="4" style="top:432px;align-items:flex-start;">
+        <div class="sheet">
+          <h3>My work</h3>
+          <div class="sub-note">In EUR, as previous invoices. Three monthly lines and one that is paid once.</div>
+          <div class="prow"><div class="lbl">Content, 8 pieces a month, made, written and scheduled, including at least two short videos</div><div class="amt">€480<span class="cad">Per month</span></div></div>
+          <div class="prow"><div class="lbl">Lighter version, 4 pieces a month</div><div class="amt">€260<span class="cad">Per month</span></div></div>
+          <div class="prow"><div class="lbl">Running the advertising: campaigns, images and words, monitoring, monthly report</div><div class="amt">€250<span class="cad">Per month</span></div></div>
+          <div class="prow"><div class="lbl">Setting up: advertising account, tracking on both sites, first set of adverts</div><div class="amt">€300<span class="cad">Once, at the start</span></div></div>
+        </div>
+        <div class="sheet">
+          <h3>Your advertising budget</h3>
+          <div class="sub-note">Paid straight from your own account to Instagram, never through me.</div>
+          <div class="prow"><div class="lbl"><strong>Test</strong><br>Finding out what reaching your audience actually costs</div><div class="amt">£150<small>–200</small><span class="cad">Per month</span></div></div>
+          <div class="prow"><div class="lbl"><strong>Growth</strong><br>Building the audience in earnest</div><div class="amt">£400<small>–500</small><span class="cad">Per month</span></div></div>
+          <div class="prow"><div class="lbl"><strong>Around an event or a launch</strong><br>A short push on top, concentrated on a date</div><div class="amt-note">A short push<br>on top</div></div>
+        </div>
+      </div>
+      <div class="strip reveal" data-d="6" style="bottom:74px;">The first month is a learning month. Until it has run, anything I tell you about cost is an estimate.</div>
+      <div class="brand-mark" style="bottom:26px;">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 8 — WHAT WE WILL LOOK AT EACH MONTH
+         ============================================================ -->
+    <section class="slide field-periwinkle narr">
+      <div class="hdr"><span>Instagram, a plan</span><span>Measurement</span><span>08 / 09</span><span>Enrique Spacca</span></div>
+      <div class="content-top" style="max-width:1500px;">
+        <div class="kicker reveal" data-d="1">Measurement</div>
+        <h1 class="h-outline reveal" data-d="2" style="font-size:88px;margin-bottom:20px;">What&nbsp;we&nbsp;will&nbsp;look&nbsp;at</h1>
+        <p class="body-copy reveal" data-d="3" style="font-size:24px;max-width:1500px;">One page, every month.</p>
+      </div>
+      <div class="chips reveal" data-d="4" style="top:432px;">
+        <div class="chip">People who saw the posts</div>
+        <div class="chip">Profile visits</div>
+        <div class="chip">Follower change</div>
+        <div class="chip">Saves and shares</div>
+        <div class="chip">Clicks through to the site</div>
+        <div class="chip">Sales from the shop</div>
+        <div class="chip">People who got in touch</div>
+      </div>
+      <div class="cards-2 reveal" data-d="5" style="top:596px;height:288px;">
+        <div class="card">
+          <div class="num">IN PRACTICE</div>
+          <p style="font-size:22px;">At the test budget, over three months, I would expect the account to move from <strong>256 followers</strong> into the several hundreds, alongside a noticeable rise in people visiting your profile and your site.</p>
+        </div>
+        <div class="card">
+          <div class="num">TWO HONEST LIMITS</div>
+          <p style="font-size:22px;">Sales through Amazon or any other outside shop cannot be traced back to us, which is one good reason to point the advertising at Eminent Productions.</p>
+          <p style="font-size:22px;margin-top:12px;">Three months is the minimum before any of this means much, because the first month is spent learning.</p>
+        </div>
+      </div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 9 — WHAT I WOULD NEED FROM YOU + NEXT
+         ============================================================ -->
+    <section class="slide field-periwinkle narr">
+      <div class="hdr"><span>Instagram, a plan</span><span>Next</span><span>09 / 09</span><span>Enrique Spacca</span></div>
+      <div class="content-top" style="max-width:1000px;">
+        <div class="kicker reveal" data-d="1">Next</div>
+        <h1 class="h-outline reveal" data-d="2" style="font-size:80px;margin-bottom:26px;">What&nbsp;I&nbsp;would<br>need&nbsp;from&nbsp;you</h1>
+      </div>
+      <div class="asks reveal" data-d="3" style="top:420px;width:900px;">
+        <div class="ask"><div class="n">01</div><div class="t">Setting up the advertising account with a card in your name. There is no account yet, so this has to be done once, from scratch. I will walk you through it and it takes about twenty minutes.</div></div>
+        <div class="ask"><div class="n">02</div><div class="t">Around 20 quotes to begin with, so the first two months can be built in one pass.</div></div>
+        <div class="ask"><div class="n">03</div><div class="t">Any dates already fixed: events, publication dates, anything with a deadline attached.</div></div>
+        <div class="ask"><div class="n">04</div><div class="t">Approval of each month's batch by an agreed date, so the schedule never slips.</div></div>
+      </div>
+      <div class="aside-card reveal" data-d="5" style="right:96px;top:420px;width:740px;">
+        <div class="tag">One suggestion, outside this proposal</div>
+        <p>Separately from the above, and costing nothing to consider: a simple signup on the site for readers who want to hear from you directly.</p>
+        <p>Those addresses are yours rather than Instagram's, they survive any change Instagram makes to its rules, and they are the cheapest way to tell people about books two and three when the time comes.</p>
+        <p>It is deliberately not part of the pricing. If it interests you, say so and I will look at it properly.</p>
+      </div>
+      <div class="strip reveal" data-d="6" style="bottom:140px;">If this looks right, I will start with the setting up and the first month of posts, and we review together after four weeks with real numbers in front of us.</div>
+      <div class="cover-foot reveal" data-d="7" style="position:absolute;left:96px;right:96px;bottom:44px;display:flex;justify-content:space-between;align-items:center;">
+        <img class="cover-logo" src="assets/ES-ART_Logo-label_small.svg" alt="Enrique Spacca Art logo" style="height:48px;width:auto;display:block;">
+        <div class="foot-right" style="font-family:var(--font-mono);font-size:16px;letter-spacing:0.04em;text-align:right;line-height:1.7;">
+          <span>Prepared by Árbol {Enrique Spacca}</span><br>
+          <a href="http://enriquespacca.com" style="color:var(--ink-text);text-decoration:none;border-bottom:1px solid var(--rule);">enriquespacca.com</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Deck controls: progress + arrows, outside the slide design system -->
+<div class="deck-controls">
+  <button id="prevBtn" aria-label="Previous slide">‹</button>
+  <span class="count"><span id="curNum">1</span> / <span id="totNum">9</span></span>
+  <button id="nextBtn" aria-label="Next slide">›</button>
+</div>
+
+<!-- Edit-mode affordance -->
+<div class="edit-hotzone" id="editHotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Edit mode (E)">✏️</button>
+
+<script>
+/* ===========================================
+   SLIDE PRESENTATION CONTROLLER
+   Stage scaling and navigation (keyboard/touch/wheel/buttons).
+   =========================================== */
+class SlidePresentation {
+  constructor(){
+    this.slides = Array.from(document.querySelectorAll('.slide'));
+    this.current = 0;
+    this.stage = document.getElementById('deckStage');
+    this.setupStageScale();
+    this.setupKeyboardNav();
+    this.setupTouchNav();
+    this.setupWheelNav();
+    this.setupButtons();
+    document.getElementById('totNum').textContent = this.slides.length;
+    this.showSlide(0);
+  }
+  setupStageScale(){
+    const scale = () => {
+      const f = Math.min(window.innerWidth/1920, window.innerHeight/1080);
+      const x = (window.innerWidth - 1920*f)/2, y = (window.innerHeight - 1080*f)/2;
+      this.stage.style.transform = `translate(${x}px, ${y}px) scale(${f})`;
+    };
+    scale(); window.addEventListener('resize', scale);
+  }
+  setupKeyboardNav(){
+    document.addEventListener('keydown', (e) => {
+      if (e.target.getAttribute && e.target.getAttribute('contenteditable') === 'true') return;
+      if (['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)) { e.preventDefault(); this.next(); }
+      if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); this.prev(); }
+    });
+  }
+  setupTouchNav(){
+    let startX = null;
+    this.stage.addEventListener('touchstart', (e) => startX = e.touches[0].clientX, {passive:true});
+    this.stage.addEventListener('touchend', (e) => {
+      if (startX === null) return;
+      const dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) > 60) dx < 0 ? this.next() : this.prev();
+      startX = null;
+    }, {passive:true});
+  }
+  setupWheelNav(){
+    let locked = false;
+    window.addEventListener('wheel', (e) => {
+      if (locked) return;
+      if (Math.abs(e.deltaY) < 24) return;
+      locked = true;
+      e.deltaY > 0 ? this.next() : this.prev();
+      setTimeout(() => locked = false, 650);
+    }, {passive:true});
+  }
+  setupButtons(){
+    document.getElementById('nextBtn').addEventListener('click', () => this.next());
+    document.getElementById('prevBtn').addEventListener('click', () => this.prev());
+  }
+  next(){ this.showSlide(Math.min(this.current+1, this.slides.length-1)); }
+  prev(){ this.showSlide(Math.max(this.current-1, 0)); }
+  showSlide(i){
+    this.current = i;
+    this.slides.forEach((s, idx) => {
+      s.classList.toggle('active', idx === i);
+      s.classList.toggle('visible', idx === i);
+    });
+    document.getElementById('curNum').textContent = i+1;
+  }
+}
+const deck = new SlidePresentation();
+
+/* ===========================================
+   INLINE EDITING (default post-draft affordance)
+   Click any text to edit; Ctrl/Cmd+S saves to localStorage.
+   =========================================== */
+class InlineEditor {
+  constructor(){
+    this.isActive = false;
+    this.storageKey = 'mb-instagram-strategy-edits';
+    this.toggle = document.getElementById('editToggle');
+    this.hotzone = document.getElementById('editHotzone');
+    this.restoreEdits();
+    this.bindEvents();
+  }
+  bindEvents(){
+    let hideTimeout = null;
+    const show = () => { clearTimeout(hideTimeout); this.toggle.classList.add('show'); };
+    const scheduleHide = () => { hideTimeout = setTimeout(() => { if (!this.isActive) this.toggle.classList.remove('show'); }, 400); };
+    this.hotzone.addEventListener('mouseenter', show);
+    this.hotzone.addEventListener('mouseleave', scheduleHide);
+    this.toggle.addEventListener('mouseenter', show);
+    this.toggle.addEventListener('mouseleave', scheduleHide);
+    this.hotzone.addEventListener('click', () => this.toggleEditMode());
+    this.toggle.addEventListener('click', () => this.toggleEditMode());
+    document.addEventListener('keydown', (e) => {
+      if ((e.key === 'e' || e.key === 'E') && (!e.target.getAttribute || e.target.getAttribute('contenteditable') !== 'true')) {
+        this.toggleEditMode();
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') { e.preventDefault(); this.save(); }
+    });
+  }
+  editableEls(){
+    return document.querySelectorAll('.slide h1, .slide .sub, .slide .body-copy, .slide .card p, .slide .name, .slide .c1, .slide .c2, .slide .c3, .slide .lbl, .slide .amt, .slide .chip, .slide .ask .t, .slide .aside-card p, .slide .strip, .slide .foot-note, .slide .sub-note');
+  }
+  toggleEditMode(){
+    this.isActive = !this.isActive;
+    this.toggle.classList.toggle('active', this.isActive);
+    this.editableEls().forEach(el => el.setAttribute('contenteditable', this.isActive ? 'true' : 'false'));
+    if (!this.isActive) this.save();
+  }
+  save(){
+    const data = {};
+    this.editableEls().forEach((el, i) => { data[i] = el.innerHTML; });
+    localStorage.setItem(this.storageKey, JSON.stringify(data));
+  }
+  restoreEdits(){
+    const raw = localStorage.getItem(this.storageKey);
+    if (!raw) return;
+    try {
+      const data = JSON.parse(raw);
+      this.editableEls().forEach((el, i) => { if (data[i] !== undefined) el.innerHTML = data[i]; });
+    } catch (e) { /* ignore corrupt storage */ }
+  }
+}
+new InlineEditor();
+</script>
+</body>
+</html>

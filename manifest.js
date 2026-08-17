@@ -36,6 +36,15 @@ const PRESENTATIONS = [
     date: "2026-07-26"
   },
   {
+    id: "mb-instagram-strategy",
+    title: "Mark Ballabon — Instagram Strategy Proposal",
+    category: "price-quotations",
+    categoryLabel: "Price Quotations",
+    cover: "mb-instagram-strategy/cover.jpg",
+    url: "mb-instagram-strategy/index.html",
+    date: "2026-08-17"
+  },
+  {
     id: "tarot-back-of-cards",
     title: "Back of Cards — TP Explorers",
     category: "presentations",
