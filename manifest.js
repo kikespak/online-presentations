@@ -52,5 +52,15 @@ const PRESENTATIONS = [
     cover: "tarot-back-of-cards/cover.jpg",
     url: "tarot-back-of-cards/index.html",
     date: "2026-08-02"
+  },
+  {
+    id: "blue-couch-live-logo-animation",
+    title: "Blue Couch LIVE! — The Logo, in Motion",
+    category: "presentations",
+    categoryLabel: "Presentations",
+    cover: "blue-couch-live-logo-animation/cover.jpg",
+    url: "blue-couch-live-logo-animation/index.html",
+    date: "2026-09-30"
   }
 ];
+
