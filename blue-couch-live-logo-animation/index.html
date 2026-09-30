@@ -300,12 +300,15 @@ body { font-family: var(--font-body); }
    The artwork is cream on blue, so it needs its own field rather
    than sitting straight on the periwinkle.
    =========================================== */
+/* The panel sits to the RIGHT of the heading and runs the full height of
+   the slide body. 390px clears "Stamp", the widest of the three headings
+   at 236px, with a 58px gutter. */
 .logo-stage {
-  position: absolute; left: 96px; right: 96px; top: 330px;
+  position: absolute; left: 390px; right: 96px; top: 170px;
   border: 1.5px solid var(--ink); background: #ffffff;
-  height: 520px; display: flex; align-items: center; justify-content: center;
+  height: 688px; display: flex; align-items: center; justify-content: center;
 }
-.logo-stage svg.bcl { width: 740px; height: auto; display: block; }
+.logo-stage svg.bcl { width: 900px; height: auto; display: block; }
 .logo-meta {
   position: absolute; left: 96px; right: 96px; top: 892px;
   display: flex; justify-content: space-between; align-items: center;
