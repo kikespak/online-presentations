@@ -1,2 +1,8 @@
 .DS_Store
 **/Cover background images/
+
+# Hub browsing view: Enrique's own internal tool, never published.
+# It lists and links every presentation in the repo, so it must stay local,
+# never deployed to GitHub Pages. See Presentation-Deploy-Pipeline-online-presentations-repo.md.
+index.html
+manifest.js
