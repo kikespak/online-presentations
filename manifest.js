@@ -61,6 +61,24 @@ const PRESENTATIONS = [
     cover: "blue-couch-live-logo-animation/cover.jpg",
     url: "blue-couch-live-logo-animation/index.html",
     date: "2026-09-30"
+  },
+  {
+    id: "modeles-de-flyers-la-classe",
+    title: "Modèles de flyers La Classe — Mode d'emploi",
+    category: "manuals",
+    categoryLabel: "Modes d'emploi",
+    cover: "modeles-de-flyers-la-classe/cover.jpg",
+    url: "modeles-de-flyers-la-classe/index.html",
+    date: "2026-11-02"
+  },
+  {
+    id: "wbs-moodboarding-session-01",
+    title: "Well-Being Sciences — Moodboard, Session 01",
+    category: "presentations",
+    categoryLabel: "Presentations",
+    cover: "wbs-moodboarding-session-01/cover.jpg",
+    url: "wbs-moodboarding-session-01/index.html",
+    date: "2026-11-03"
   }
 ];
 

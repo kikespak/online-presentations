@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WBS Website — Moodboard, Session 01</title>
+
+<!-- Fonts: IBM Plex Sans (headlines/body) + IBM Plex Mono (labels, captions) — the shared deck chrome font. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================================================
+   THE SKIN — Well-Being Sciences, Moodboard Session 01
+   Quiet cream-and-ink chrome on purpose: the boards carry the colour, and
+   nothing in the frame should compete with the palette they're proposing.
+   =========================================================================== */
+:root {
+  --field:        #F3F0E8;   /* page field, warm cream */
+  --deep:         #22281C;   /* cover field, deep moss-charcoal */
+  --paper:        #FFFFFF;   /* the panel an image sits on */
+  --ink:          #211F1A;
+  --ink-text:     rgba(33,31,26,0.84);
+  --ink-soft:     rgba(33,31,26,0.56);
+  --accent:       #6E7D5A;   /* sage — kickers, numerals, the one accent colour */
+  --rule:         rgba(33,31,26,0.14);
+  --panel-line:   rgba(33,31,26,0.2);
+
+  --font-display: 'IBM Plex Sans', sans-serif;
+  --font-body:    'IBM Plex Sans', sans-serif;
+  --font-mono:    'IBM Plex Mono', monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-normal: 0.7s;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ===========================================
+   FIXED 16:9 STAGE — mandatory base
+   =========================================== */
+html, body { width:100%; height:100%; margin:0; overflow:hidden; background:#0d0d0b; }
+.deck-viewport { position:fixed; inset:0; overflow:hidden; background:#0d0d0b; }
+.deck-stage { position:absolute; left:0; top:0; width:1920px; height:1080px; overflow:hidden; transform-origin:0 0; background: var(--field); }
+.slide { position:absolute; inset:0; width:1920px; height:1080px; overflow:hidden; display:block; visibility:hidden; opacity:0; pointer-events:none; background: var(--field); }
+.slide.active, .slide.visible { visibility:visible; opacity:1; pointer-events:auto; z-index:1; }
+img, video, canvas, svg { max-width:100%; max-height:100%; }
+.deck-controls { position:fixed; left:50%; bottom:22px; transform:translateX(-50%); z-index:1000; }
+@media print {
+  html, body { width:1920px; height:auto; overflow:visible; background:#fff; }
+  .deck-viewport { position:static; overflow:visible; background:#fff; }
+  .deck-stage { position:static; width:auto; height:auto; transform:none !important; background:none; }
+  .slide { position:relative; display:block !important; visibility:visible !important; opacity:1 !important; pointer-events:auto !important; width:1920px; height:1080px; break-after:page; page-break-after:always; }
+  .slide:last-child { break-after:auto; page-break-after:auto; }
+  .deck-controls { display:none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration:0.01ms !important; transition-duration:0.2s !important; }
+}
+
+body { font-family: var(--font-body); color: var(--ink-text); }
+.slide.field-deep { background: var(--deep); color: rgba(255,255,255,0.92); }
+
+/* ===========================================
+   REVEAL
+   =========================================== */
+.reveal {
+  opacity: 0; transform: translateY(28px);
+  transition: opacity var(--duration-normal) var(--ease-out-expo),
+              transform var(--duration-normal) var(--ease-out-expo);
+}
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+.reveal[data-d="1"] { transition-delay: .08s; }
+.reveal[data-d="2"] { transition-delay: .18s; }
+.reveal[data-d="3"] { transition-delay: .28s; }
+.reveal[data-d="4"] { transition-delay: .38s; }
+.reveal[data-d="5"] { transition-delay: .48s; }
+
+/* ===========================================
+   TYPOGRAPHY
+   =========================================== */
+.mono { font-family: var(--font-mono); }
+.kicker {
+  font-family: var(--font-mono); font-size: 20px; font-weight: 600;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent);
+}
+.field-deep .kicker { color: rgba(255,255,255,0.68); }
+
+h1 { font-family: var(--font-display); font-weight: 700; font-size: 88px; line-height: 1.0; letter-spacing: -0.02em; color: var(--ink); }
+.field-deep h1 { color: #fff; }
+
+.body-copy { font-size: 29px; line-height: 1.5; color: var(--ink-text); max-width: 980px; }
+.field-deep .body-copy { color: rgba(255,255,255,0.82); }
+
+.rule { height: 1px; background: var(--rule); border: none; }
+
+/* ===========================================
+   RUNNING HEADER + BRAND MARK
+   =========================================== */
+.hdr {
+  position: absolute; top: 64px; left: 96px; right: 96px; z-index: 3;
+  display: flex; align-items: baseline; justify-content: space-between;
+  font-family: var(--font-mono); font-size: 15px; font-weight: 500;
+  letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink); opacity: 0.6;
+  padding-bottom: 18px; border-bottom: 1px solid var(--rule);
+}
+.hdr span { white-space: nowrap; }
+.hdr span + span { margin-left: 32px; }
+
+.brand-mark {
+  position: absolute; bottom: 48px; right: 96px; z-index: 3;
+  font-family: var(--font-mono); font-weight: 700; font-size: 16px;
+  letter-spacing: 0.04em; color: var(--ink); opacity: 0.56;
+}
+
+/* ===========================================
+   SLIDE 1 — COVER
+   =========================================== */
+.s-cover .ref-chip {
+  position: absolute; top: 64px; left: 96px;
+  border: 1.5px solid rgba(255,255,255,0.4);
+  font-family: var(--font-mono); font-size: 16px; font-weight: 500;
+  letter-spacing: 0.06em; padding: 16px 22px; line-height: 1.6;
+  color: rgba(255,255,255,0.84);
+}
+.s-cover .cover-meta {
+  position: absolute; top: 64px; right: 96px; text-align: right;
+  font-family: var(--font-mono); font-size: 16px; color: rgba(255,255,255,0.56);
+  line-height: 1.8; letter-spacing: 0.06em; text-transform: uppercase;
+}
+.s-cover .cover-mid { position: absolute; left: 96px; right: 96px; top: 400px; }
+.s-cover h1 { font-size: 132px; max-width: 1200px; }
+.s-cover .sub { font-size: 32px; max-width: 980px; margin-top: 30px; color: rgba(255,255,255,0.78); }
+.s-cover .cover-foot {
+  position: absolute; left: 96px; right: 96px; bottom: 72px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.s-cover .cover-logo { height: 60px; width: auto; display: block; }
+.s-cover .foot-right {
+  font-family: var(--font-mono); font-size: 16px; letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.68); text-align: right; line-height: 1.7;
+}
+.s-cover .foot-right a { color: rgba(255,255,255,0.68); text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.3); }
+
+/* ===========================================
+   FIGURE SLIDES — one board image, as large as the frame allows
+   The artwork frame carries the house radius (20px) and clips, per the
+   repo's house style for any panel holding produce rather than copy.
+   =========================================== */
+.fig-head {
+  position: absolute; top: 148px; left: 96px; right: 96px; z-index: 3;
+  display: flex; align-items: baseline; justify-content: space-between;
+}
+.fig-head .fig-name { font-family: var(--font-display); font-weight: 700; font-size: 40px; color: var(--ink); }
+.fig-head .fig-num { font-family: var(--font-mono); font-size: 17px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-right: 18px; }
+
+/* The border hugs the image's own aspect ratio rather than sitting inside an
+   oversized box — the frame is the image, not a mat it floats inside. */
+.fig-stage {
+  position: absolute; top: 224px; left: 96px; right: 96px; bottom: 136px;
+  display: flex; align-items: center; justify-content: center;
+}
+.fig-stage img {
+  max-width: 100%; max-height: 100%; width: auto; height: auto; display: block;
+  background: var(--paper); border: 1.5px solid var(--panel-line); border-radius: 20px;
+}
+
+.fig-cap {
+  position: absolute; left: 96px; bottom: 56px; z-index: 3;
+  font-family: var(--font-mono); font-size: 16px; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft);
+}
+
+/* The board overview gets the full stage height, no head row, caption only */
+.s-board .fig-stage { top: 164px; }
+
+/* ===========================================
+   DECK CONTROLS
+   =========================================== */
+.deck-controls { display: flex; align-items: center; gap: 18px; background: rgba(0,0,0,0.72); backdrop-filter: blur(6px); padding: 10px 20px; border-radius: 999px; }
+.deck-controls button { background: none; border: none; color: #F5F4EC; font-size: 20px; cursor: pointer; line-height: 1; }
+.deck-controls .count { font-family: var(--font-mono); font-size: 14px; color: #F5F4EC; opacity: 0.7; min-width: 56px; text-align: center; }
+
+</style>
+</head>
+<body>
+<div class="deck-viewport">
+  <main class="deck-stage" id="deckStage">
+
+    <!-- ============================================================
+         SLIDE 1 — COVER
+         ============================================================ -->
+    <section class="slide field-deep s-cover active">
+      <div class="ref-chip reveal" data-d="1">WELL-BEING SCIENCES · WEBSITE<br>MOODBOARDING — SESSION 01</div>
+      <div class="cover-meta reveal" data-d="1">03.11.2026<br>Between phase 1 and phase 2</div>
+      <div class="cover-mid">
+        <div class="kicker reveal" data-d="2">Visual direction</div>
+        <h1 class="reveal" data-d="3">Moodboard<br>Session 01</h1>
+        <p class="sub reveal" data-d="4">A pastel, frequency-led palette — held together by nature, geometry and the human qualities the site wants to carry.</p>
+      </div>
+      <div class="cover-foot reveal" data-d="5">
+        <img class="cover-logo" src="assets/ES-ART_Logo-label_small.svg" alt="Enrique Spacca Art logo">
+        <div class="foot-right">
+          <span>Enrique Spacca Art · Prepared by Árbol {Enrique Spacca}</span><br>
+          <a href="http://enriquespacca.com">enriquespacca.com</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 2 — THE BOARD, WHOLE
+         ============================================================ -->
+    <section class="slide s-board">
+      <div class="hdr"><span>WBS Website</span><span>Moodboard · Session 01</span><span>02 / 06</span><span>Enrique Spacca</span></div>
+      <div class="fig-stage reveal" data-d="1"><img src="assets/board-full.jpg" alt="Full moodboard: five clusters — abstract gradients, natural world and the world of frequency, geometry, typography, human qualities"></div>
+      <div class="fig-cap reveal" data-d="2">The board — five directions, one field</div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 3 — CLUSTER: GEOMETRY
+         ============================================================ -->
+    <section class="slide">
+      <div class="hdr"><span>WBS Website</span><span>Moodboard · Session 01</span><span>03 / 06</span><span>Enrique Spacca</span></div>
+      <div class="fig-head reveal" data-d="1"><span><span class="fig-num">Cluster 01</span><span class="fig-name">Geometry</span></span></div>
+      <div class="fig-stage reveal" data-d="2"><img src="assets/cluster-geometry.jpg" alt="Geometry cluster: sacred-geometry diagrams, radiating circles and soft gradient discs"></div>
+      <div class="fig-cap reveal" data-d="3">Sacred pattern, softened</div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 4 — CLUSTER: TYPOGRAPHY
+         ============================================================ -->
+    <section class="slide">
+      <div class="hdr"><span>WBS Website</span><span>Moodboard · Session 01</span><span>04 / 06</span><span>Enrique Spacca</span></div>
+      <div class="fig-head reveal" data-d="1"><span><span class="fig-num">Cluster 02</span><span class="fig-name">Typography</span></span></div>
+      <div class="fig-stage reveal" data-d="2"><img src="assets/cluster-typography.jpg" alt="Typography cluster: gradient poster type treatments and quiet editorial layouts"></div>
+      <div class="fig-cap reveal" data-d="3">Quiet editorial, warm fields</div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 5 — CLUSTER: HUMAN QUALITIES
+         ============================================================ -->
+    <section class="slide">
+      <div class="hdr"><span>WBS Website</span><span>Moodboard · Session 01</span><span>05 / 06</span><span>Enrique Spacca</span></div>
+      <div class="fig-head reveal" data-d="1"><span><span class="fig-num">Cluster 03</span><span class="fig-name">Human qualities</span></span></div>
+      <div class="fig-stage reveal" data-d="2"><img src="assets/cluster-human-qualities.jpg" alt="Human qualities cluster: hands, eyes, skin and nature close-ups, captioned kindness, consideration, hope, belief, care, humility, truth, genuineness, integrity, mutuality, fairness"></div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 6 — CLUSTER: NATURAL WORLD & THE WORLD OF FREQUENCY
+         ============================================================ -->
+    <section class="slide">
+      <div class="hdr"><span>WBS Website</span><span>Moodboard · Session 01</span><span>06 / 06</span><span>Enrique Spacca</span></div>
+      <div class="fig-head reveal" data-d="1"><span><span class="fig-num">Cluster 04</span><span class="fig-name">Natural world &amp; frequency</span></span></div>
+      <div class="fig-stage reveal" data-d="2"><img src="assets/cluster-natural-frequency.jpg" alt="Natural world and frequency cluster: water ripples, grass, butterflies and a glitched frequency pattern"></div>
+      <div class="fig-cap reveal" data-d="3">Where ripple meets signal</div>
+      <div class="brand-mark">Enrique Spacca</div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Deck controls: progress + arrows, outside the slide design system -->
+<div class="deck-controls">
+  <button id="prevBtn" aria-label="Previous slide">‹</button>
+  <span class="count"><span id="curNum">1</span> / <span id="totNum">6</span></span>
+  <button id="nextBtn" aria-label="Next slide">›</button>
+</div>
+
+<script>
+/* ===========================================
+   SLIDE PRESENTATION CONTROLLER
+   Handles stage scaling and navigation (keyboard/touch/wheel/buttons).
+   =========================================== */
+class SlidePresentation {
+  constructor(){
+    this.slides = Array.from(document.querySelectorAll('.slide'));
+    this.current = 0;
+    this.stage = document.getElementById('deckStage');
+    this.setupStageScale();
+    this.setupKeyboardNav();
+    this.setupTouchNav();
+    this.setupWheelNav();
+    this.setupButtons();
+    document.getElementById('totNum').textContent = this.slides.length;
+    this.showSlide(0);
+  }
+  setupStageScale(){
+    const scale = () => {
+      const f = Math.min(window.innerWidth/1920, window.innerHeight/1080);
+      const x = (window.innerWidth - 1920*f)/2, y = (window.innerHeight - 1080*f)/2;
+      this.stage.style.transform = `translate(${x}px, ${y}px) scale(${f})`;
+    };
+    scale(); window.addEventListener('resize', scale);
+  }
+  setupKeyboardNav(){
+    document.addEventListener('keydown', (e) => {
+      if (['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)) { e.preventDefault(); this.next(); }
+      if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); this.prev(); }
+    });
+  }
+  setupTouchNav(){
+    let startX = null;
+    this.stage.addEventListener('touchstart', (e) => startX = e.touches[0].clientX, {passive:true});
+    this.stage.addEventListener('touchend', (e) => {
+      if (startX === null) return;
+      const dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) > 60) dx < 0 ? this.next() : this.prev();
+      startX = null;
+    }, {passive:true});
+  }
+  setupWheelNav(){
+    let locked = false;
+    window.addEventListener('wheel', (e) => {
+      if (locked) return;
+      if (Math.abs(e.deltaY) < 24) return;
+      locked = true;
+      e.deltaY > 0 ? this.next() : this.prev();
+      setTimeout(() => locked = false, 650);
+    }, {passive:true});
+  }
+  setupButtons(){
+    document.getElementById('nextBtn').addEventListener('click', () => this.next());
+    document.getElementById('prevBtn').addEventListener('click', () => this.prev());
+  }
+  next(){ this.showSlide(Math.min(this.current+1, this.slides.length-1)); }
+  prev(){ this.showSlide(Math.max(this.current-1, 0)); }
+  showSlide(i){
+    this.current = i;
+    this.slides.forEach((s, idx) => {
+      s.classList.toggle('active', idx === i);
+      s.classList.toggle('visible', idx === i);
+    });
+    document.getElementById('curNum').textContent = i+1;
+  }
+}
+new SlidePresentation();
+</script>
+</body>
+</html>
